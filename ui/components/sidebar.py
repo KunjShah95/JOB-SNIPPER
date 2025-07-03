@@ -67,27 +67,27 @@ def get_navigation_choice() -> str:
     )
     
     return nav_options[choice]
-
-
-def show_config_status():
-    """Show configuration status in sidebar"""
-    
-    st.markdown("### ⚙️ System Status")
-    
-    # Load current config
-    try:
-        config = load_config()
-        validation = validate_config(config)
-        
         # AI Providers
         if validation['ai_providers']:
-            st.success(f"🤖 AI: {', '.join(validation['ai_providers']).title()}")
+            providers_text = ', '.join(validation['ai_providers']).replace('gemini-2.5-pro', 'Gemini 2.5 Pro').title()
+            st.success(f"🤖 AI: {providers_text}")
         else:
             st.error("🤖 AI: Not configured")
+        
+        # Show warnings if any
+        if 'warnings' in validation and validation['warnings']:
+            for warning in validation['warnings'][:2]:  # Show max 2 warnings
+                st.warning(f"⚠️ {warning}")
         
         # Email
         if 'email_reports' in validation['features_enabled']:
             st.success("📧 Email: Configured")
+        else:
+            st.warning("📧 Email: Not configured")
+        
+        # Features
+        feature_count = validation.get('total_features', len(validation.get('features_enabled', [])))
+        st.info(f"🔧 Features: {feature_count} enabled")
         else:
             st.warning("📧 Email: Not configured")
         
