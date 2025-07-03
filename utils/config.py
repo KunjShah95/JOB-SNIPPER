@@ -116,41 +116,41 @@ def load_config():
         return {}
 
 def validate_config():
-    """Validate configuration and return status"""
+def validate_config():
+    """Validate configuration and return comprehensive status"""
     issues = []
+    warnings = []
+    ai_providers = []
+    features_enabled = []
     
-    if not GEMINI_AVAILABLE and not MISTRAL_AVAILABLE:
-        issues.append("No AI provider configured. Please set GEMINI_API_KEY or MISTRAL_API_KEY")
+    # Check AI providers
+    if GEMINI_AVAILABLE:
+        ai_providers.append('gemini-2.5-pro')
+    elif GEMINI_API_KEY:
+        warnings.append('Gemini API key provided but invalid format')
     
-    if not EMAIL_AVAILABLE:
-        issues.append("Email not configured. Please set SENDER_EMAIL and SENDER_PASSWORD")
+    if MISTRAL_AVAILABLE:
+        ai_providers.append('mistral')
+    elif MISTRAL_API_KEY:
+        warnings.append('Mistral API key provided but invalid format')
     
+    if not ai_providers:
+        issues.append('No valid AI provider configured. Please set GEMINI_API_KEY or MISTRAL_API_KEY')
+    
+    # Check email configuration
+    if EMAIL_AVAILABLE:
+        features_enabled.append('email_reports')
+    else:
+        warnings.append('Email not configured - reports will not be sent')
+    
+    # Check other features
+    for feature, enabled in FEATURES.items():
+        if enabled:
+            features_enabled.append(feature)
+    
+    # Check cookie key
     if not COOKIE_KEY:
-        issues.append("COOKIE_KEY not set. Please set a secure cookie key")
+        warnings.append('COOKIE_KEY not set - using default (not secure for production)')
     
     return {
-        "valid": len(issues) == 0,
-        "issues": issues,
-        "ai_provider": AI_PROVIDER,
-        "features_enabled": sum(FEATURES.values())
-    }
-
-# Explicitly define what's available for import
-__all__ = [
-    "GEMINI_API_KEY",
-    "MISTRAL_API_KEY",
-    "COOKIE_KEY",
-    "SENDER_EMAIL",
-    "SENDER_PASSWORD",
-    "SMTP_SERVER",
-    "SMTP_PORT",
-    "FIRECRAWL_API_KEY",
-    "GEMINI_AVAILABLE",
-    "MISTRAL_AVAILABLE",
-    "EMAIL_AVAILABLE",
-    "AI_PROVIDER",
-    "FEATURES",
-    "update_email_config",
-    "load_config",
-    "validate_config"
-]
+        'valid': len(issues) == 0,
