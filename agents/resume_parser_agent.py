@@ -26,17 +26,17 @@ class ResumeParserAgent(MultiAIAgent):
             message = AgentMessage(sender="user", recipient=self.name, data=input_data)
             return json.loads(self.run(message.to_json()))
 
-Resume Content:
-{resume_text}
+    def run(self, message_json):
+        msg = AgentMessage.from_json(message_json)
+        resume_text = msg.data
 
-Extract the following fields:
-1. name: The candidate's full name
-2. skills: A list of all technical and soft skills mentioned
-3. education: Details about education including degrees and institutions
-4. experience: Work experience details with company names and durations
-5. contact: Contact information (email, phone)
-6. years_of_experience: Estimated total years of experience
+        if not resume_text or len(resume_text) < 10:
+            logging.warning("Resume text is too short or empty")
+            parsed = self.fallback_parsing(resume_text)
+            return AgentMessage(self.name, msg.sender, parsed).to_json()
 
+        # Always try AI first, fallback only if AI fails
+        prompt = f"""Extract the following information from this resume in JSON format:
 Return ONLY valid JSON with these fields. Do not include any additional text or explanation."""
 
         try:
