@@ -63,17 +63,17 @@ Return ONLY valid JSON with these fields. Do not include any additional text or 
                             provider_response = response["responses"][provider]
                             # Try to extract JSON if wrapped in text
                             json_match = re.search(
-            else:
-                # Try to parse the response as JSON
-                try:
-                    # If response is string, try to extract JSON if wrapped in text
-                    if isinstance(response, str):
-                        json_match = re.search(r"{.*}", response, re.DOTALL)
-                        if json_match:
-                            response = json_match.group(0)
-                    parsed = json.loads(response)
-                except Exception as e:
-                    logging.warning(f"Failed to parse JSON response: {e}")
+                                r"{.*}", provider_response, re.DOTALL
+                            )
+                            if json_match:
+                                provider_response = json_match.group(0)
+                            parsed = json.loads(provider_response)
+                            break
+                        except Exception as e:
+                            logging.warning(f"Failed to parse {provider} response: {e}")
+                            continue
+                else:
+                    # If none of the responses parsed, use fallback
                     parsed = self.fallback_parsing(resume_text)
         except Exception as e:
             logging.error(f"AI response generation failed: {e}")
