@@ -12,3 +12,5 @@ python-docx>=0.8.11
 reportlab>=4.0.0
 firecrawl-py>=0.0.8
 beautifulsoup4>=4.12.0
+fpdf2>=2.7.0
+yagmail>=0.15.0
