@@ -51,18 +51,18 @@ Extract the following fields:
 
 Return ONLY valid JSON with these fields. Do not include any additional text or explanation."""
 
-                                r"{.*}", provider_response, re.DOTALL
-                            )
-                            if json_match:
-                                provider_response = json_match.group(0)
-                            parsed = json.loads(provider_response)
-                            break
-                        except Exception as e:
-                            logging.warning(f"Failed to parse {provider} response: {e}")
-                            continue
-                else:
-                    # If none of the responses parsed, use fallback
-                    parsed = self.fallback_parsing(resume_text)
+        try:
+            response = self.generate_ai_response(prompt)
+
+            # Handle different response formats
+            if isinstance(response, dict) and "responses" in response:
+                # If we have multiple AI responses, use the first one that parses to JSON
+                for provider in self.provider_priority:
+                    if provider in response["responses"]:
+                        try:
+                            provider_response = response["responses"][provider]
+                            # Try to extract JSON if wrapped in text
+                            json_match = re.search(
             else:
                 # Try to parse the response as JSON
                 try:
