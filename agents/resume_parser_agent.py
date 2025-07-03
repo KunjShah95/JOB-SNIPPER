@@ -37,20 +37,20 @@ class ResumeParserAgent(MultiAIAgent):
 
         # Always try AI first, fallback only if AI fails
         prompt = f"""Extract the following information from this resume in JSON format:
+        
+Resume Content:
+{resume_text}
+
+Extract the following fields:
+1. name: The candidate's full name
+2. skills: A list of all technical and soft skills mentioned
+3. education: Details about education including degrees and institutions
+4. experience: Work experience details with company names and durations
+5. contact: Contact information (email, phone)
+6. years_of_experience: Estimated total years of experience
+
 Return ONLY valid JSON with these fields. Do not include any additional text or explanation."""
 
-        try:
-            response = self.generate_ai_response(prompt)
-
-            # Handle different response formats
-            if isinstance(response, dict) and "responses" in response:
-                # If we have multiple AI responses, use the first one that parses to JSON
-                for provider in self.provider_priority:
-                    if provider in response["responses"]:
-                        try:
-                            provider_response = response["responses"][provider]
-                            # Try to extract JSON if wrapped in text
-                            json_match = re.search(
                                 r"{.*}", provider_response, re.DOTALL
                             )
                             if json_match:
