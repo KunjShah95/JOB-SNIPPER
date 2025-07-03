@@ -79,15 +79,15 @@ class MultiAIAgent(Agent):
     def setup_ai_clients(self):
         """Setup both Gemini and Mistral clients if available"""
         # Setup Gemini
-                self.gemini_model = genai.GenerativeModel("gemini-2.5-pro")
+        if self.use_gemini and GENAI_AVAILABLE and GEMINI_API_KEY:
             try:
                 import google.generativeai as genai
 
                 genai.configure(api_key=GEMINI_API_KEY)
-                self.gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+                self.gemini_model = genai.GenerativeModel("gemini-2.5-pro")
                 self.gemini_available = True
                 if self.verbose:
-                    logging.info("Gemini client initialized.")
+                    logging.info("Gemini 2.5 Pro client initialized.")
             except Exception as e:
                 logging.warning(f"Failed to setup Gemini: {e}")
         # Setup Mistral
