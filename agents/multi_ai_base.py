@@ -79,7 +79,7 @@ class MultiAIAgent(Agent):
     def setup_ai_clients(self):
         """Setup both Gemini and Mistral clients if available"""
         # Setup Gemini
-        if self.use_gemini and GENAI_AVAILABLE and GEMINI_API_KEY:
+                self.gemini_model = genai.GenerativeModel("gemini-2.5-pro")
             try:
                 import google.generativeai as genai
 
