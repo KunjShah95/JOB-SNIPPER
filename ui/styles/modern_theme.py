@@ -102,73 +102,73 @@ class ModernTheme:
         }}
         
         ::-webkit-scrollbar-track {{
-            background: {cls.COLORS['surface']};
-            border-radius: {cls.RADIUS['md']};
-        }}
-        
-        ::-webkit-scrollbar-thumb {{
-            background: {cls.COLORS['text_muted']};
-            border-radius: {cls.RADIUS['md']};
-        }}
-        
-        ::-webkit-scrollbar-thumb:hover {{
-            background: {cls.COLORS['text_secondary']};
-        }}
-        
         /* Sidebar Styling */
-        .css-1d391kg {{
-            background: {cls.COLORS['surface']};
-            border-right: 1px solid {cls.COLORS['surface_dark']};
-        }}
+        .css-1d391kg, .css-1lcbmhc, .css-17eq0hr {
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%) !important;
+            border-right: 1px solid {cls.COLORS['surface_dark']} !important;
+        }
         
-        /* Main Content Area */
-        .main .block-container {{
-            padding-top: {cls.SPACING['lg']};
-            padding-bottom: {cls.SPACING['lg']};
-            max-width: 1200px;
-        }}
+        /* Sidebar Text Colors */
+        .css-1d391kg .stMarkdown, .css-1lcbmhc .stMarkdown, .css-17eq0hr .stMarkdown {
+            color: white !important;
+        }
         
-        /* Headers */
-        h1, h2, h3, h4, h5, h6 {{
-            font-family: {cls.FONTS['secondary']};
-            font-weight: 600;
-            color: {cls.COLORS['text_primary']};
-            margin-bottom: {cls.SPACING['md']};
-        }}
+        .css-1d391kg h1, .css-1lcbmhc h1, .css-17eq0hr h1,
+        .css-1d391kg h2, .css-1lcbmhc h2, .css-17eq0hr h2,
+        .css-1d391kg h3, .css-1lcbmhc h3, .css-17eq0hr h3,
+        .css-1d391kg p, .css-1lcbmhc p, .css-17eq0hr p {
+            color: white !important;
+        }
         
-        h1 {{
-            font-size: 2.5rem;
-            line-height: 1.2;
-        }}
+        /* Sidebar Radio Buttons */
+        .css-1d391kg .stRadio label, .css-1lcbmhc .stRadio label, .css-17eq0hr .stRadio label {
+            color: white !important;
+        }
         
-        h2 {{
-            font-size: 2rem;
-            line-height: 1.3;
-        }}
+        /* Sidebar Checkboxes */
+        .css-1d391kg .stCheckbox label, .css-1lcbmhc .stCheckbox label, .css-17eq0hr .stCheckbox label {
+            color: white !important;
+        }
         
-        h3 {{
-            font-size: 1.5rem;
-            line-height: 1.4;
-        }}
+        /* Sidebar Selectbox */
+        .css-1d391kg .stSelectbox label, .css-1lcbmhc .stSelectbox label, .css-17eq0hr .stSelectbox label {
+            color: white !important;
+        }
         
-        /* Buttons */
-        .stButton > button {{
-            background: {cls.COLORS['primary']};
-            color: white;
-            border: none;
-            border-radius: {cls.RADIUS['md']};
-            padding: {cls.SPACING['sm']} {cls.SPACING['lg']};
-            font-weight: 500;
-            font-family: {cls.FONTS['primary']};
-            transition: all 0.3s ease;
-            box-shadow: {cls.SHADOWS['sm']};
-        }}
+        /* Sidebar Input Labels */
+        .css-1d391kg .stTextInput label, .css-1lcbmhc .stTextInput label, .css-17eq0hr .stTextInput label {
+            color: white !important;
+        }
         
-        .stButton > button:hover {{
-            background: {cls.COLORS['primary_dark']};
-            box-shadow: {cls.SHADOWS['md']};
-            transform: translateY(-2px);
-        }}
+        /* Sidebar Dividers */
+        .css-1d391kg hr, .css-1lcbmhc hr, .css-17eq0hr hr {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        /* Sidebar Success/Warning/Error Messages */
+        .css-1d391kg .stSuccess, .css-1lcbmhc .stSuccess, .css-17eq0hr .stSuccess {
+            background-color: rgba(40, 167, 69, 0.2) !important;
+            border: 1px solid rgba(40, 167, 69, 0.5) !important;
+            color: #90EE90 !important;
+        }
+        
+        .css-1d391kg .stWarning, .css-1lcbmhc .stWarning, .css-17eq0hr .stWarning {
+            background-color: rgba(255, 193, 7, 0.2) !important;
+            border: 1px solid rgba(255, 193, 7, 0.5) !important;
+            color: #FFE066 !important;
+        }
+        
+        .css-1d391kg .stError, .css-1lcbmhc .stError, .css-17eq0hr .stError {
+            background-color: rgba(220, 53, 69, 0.2) !important;
+            border: 1px solid rgba(220, 53, 69, 0.5) !important;
+            color: #FFB3BA !important;
+        }
+        
+        .css-1d391kg .stInfo, .css-1lcbmhc .stInfo, .css-17eq0hr .stInfo {
+            background-color: rgba(23, 162, 184, 0.2) !important;
+            border: 1px solid rgba(23, 162, 184, 0.5) !important;
+            color: #87CEEB !important;
+        }
         
         /* Input Fields */
         .stTextInput > div > div > input,
