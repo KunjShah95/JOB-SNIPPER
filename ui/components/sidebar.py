@@ -88,14 +88,14 @@ def get_navigation_choice() -> str:
         # Features
         feature_count = validation.get('total_features', len(validation.get('features_enabled', [])))
         st.info(f"🔧 Features: {feature_count} enabled")
-        else:
-            st.warning("📧 Email: Not configured")
-        
-        # Features
-        feature_count = len(validation['features_enabled'])
-        st.info(f"🔧 Features: {feature_count} enabled")
         
         # Store validation in session state
+        st.session_state['config_valid'] = validation['valid']
+        st.session_state['config_validation'] = validation
+        
+    except Exception as e:
+        st.error("❌ Config: Error loading")
+        st.session_state['config_valid'] = False
         st.session_state['config_valid'] = validation['valid']
         st.session_state['config_validation'] = validation
         
