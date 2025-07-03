@@ -170,54 +170,54 @@ class ModernTheme:
             color: #87CEEB !important;
         }
         
-        /* Input Fields */
-        .stTextInput > div > div > input,
-        .stTextArea > div > div > textarea,
-        .stSelectbox > div > div > select {{
-            border: 2px solid {cls.COLORS['surface_dark']};
-            border-radius: {cls.RADIUS['md']};
-            padding: {cls.SPACING['sm']};
-            font-family: {cls.FONTS['primary']};
-            transition: border-color 0.3s ease;
-        }}
+        /* Main Content Area */
+        .main .block-container {
+            padding-top: {cls.SPACING['lg']};
+            padding-bottom: {cls.SPACING['lg']};
+            max-width: 1200px;
+        }
         
-        .stTextInput > div > div > input:focus,
-        .stTextArea > div > div > textarea:focus,
-        .stSelectbox > div > div > select:focus {{
-            border-color: {cls.COLORS['primary']};
-            box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.1);
-        }}
-        
-        /* File Uploader */
-        .stFileUploader {{
-            border: 2px dashed {cls.COLORS['surface_dark']};
-            border-radius: {cls.RADIUS['lg']};
-            padding: {cls.SPACING['xl']};
-            text-align: center;
-            transition: all 0.3s ease;
-        }}
-        
-        .stFileUploader:hover {{
-            border-color: {cls.COLORS['primary']};
-            background-color: {cls.COLORS['surface']};
-        }}
-        
-        /* Metrics */
-        .metric-container {{
-            background: white;
-            padding: {cls.SPACING['lg']};
-            border-radius: {cls.RADIUS['lg']};
-            box-shadow: {cls.SHADOWS['sm']};
-            border-left: 4px solid {cls.COLORS['primary']};
+        /* Headers */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: {cls.FONTS['secondary']};
+            font-weight: 600;
+            color: {cls.COLORS['text_primary']};
             margin-bottom: {cls.SPACING['md']};
-        }}
+        }
         
-        /* Progress Bars */
-        .stProgress > div > div > div > div {{
+        h1 {
+            font-size: 2.5rem;
+            line-height: 1.2;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            line-height: 1.3;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            line-height: 1.4;
+        }
+        
+        /* Buttons */
+        .stButton > button {
             background: {cls.COLORS['primary']};
-            border-radius: {cls.RADIUS['full']};
-        }}
+            color: white;
+            border: none;
+            border-radius: {cls.RADIUS['md']};
+            padding: {cls.SPACING['sm']} {cls.SPACING['lg']};
+            font-weight: 500;
+            font-family: {cls.FONTS['primary']};
+            transition: all 0.3s ease;
+            box-shadow: {cls.SHADOWS['sm']};
+        }
         
+        .stButton > button:hover {
+            background: {cls.COLORS['primary_dark']};
+            box-shadow: {cls.SHADOWS['md']};
+            transform: translateY(-2px);
+        }
         /* Expander */
         .streamlit-expanderHeader {{
             background: {cls.COLORS['surface']};
