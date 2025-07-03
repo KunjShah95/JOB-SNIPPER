@@ -12,20 +12,20 @@ class ResumeParserAgent(MultiAIAgent):
             use_gemini=True,
             use_mistral=True,
             return_mode="compare",  # Use compare to see both model outputs
-        )
+    def process(self, input_data):
+        """Implementation of abstract process method from Agent base class"""
+        # Convert input_data to the expected message format for run() method
+        if isinstance(input_data, dict) and 'data' in input_data:
+            # If input_data already has the expected structure
+            from agents.message_protocol import AgentMessage
+            message = AgentMessage(sender="user", recipient=self.name, data=input_data['data'])
+            return json.loads(self.run(message.to_json()))
+        else:
+            # Assume input_data is the resume text directly
+            from agents.message_protocol import AgentMessage
+            message = AgentMessage(sender="user", recipient=self.name, data=input_data)
+            return json.loads(self.run(message.to_json()))
 
-    def run(self, message_json):
-        msg = AgentMessage.from_json(message_json)
-        resume_text = msg.data
-
-        if not resume_text or len(resume_text) < 10:
-            logging.warning("Resume text is too short or empty")
-            parsed = self.fallback_parsing(resume_text)
-            return AgentMessage(self.name, msg.sender, parsed).to_json()
-
-        # Always try AI first, fallback only if AI fails
-        prompt = f"""Extract the following information from this resume in JSON format:
-        
 Resume Content:
 {resume_text}
 
