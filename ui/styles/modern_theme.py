@@ -102,74 +102,74 @@ class ModernTheme:
         }}
         
         ::-webkit-scrollbar-track {{
-        /* Sidebar Styling */
-        .css-1d391kg, .css-1lcbmhc, .css-17eq0hr, .st-emotion-cache-16txtl3, .st-emotion-cache-1y4p8pa {
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%) !important;
-            border-right: 1px solid {cls.COLORS['surface_dark']} !important;
-        }
-        
-        /* Sidebar Text Colors */
-        .css-1d391kg .stMarkdown, .css-1lcbmhc .stMarkdown, .css-17eq0hr .stMarkdown, .st-emotion-cache-16txtl3 .stMarkdown, .st-emotion-cache-1y4p8pa .stMarkdown {
+        /* ULTIMATE SIDEBAR VISIBILITY FIX */
+        /* Target ALL possible sidebar container classes */
+        .css-1d391kg, .css-1lcbmhc, .css-17eq0hr, .css-1y4p8pa, .css-16txtl3,
+        .st-emotion-cache-16txtl3, .st-emotion-cache-1y4p8pa, .st-emotion-cache-1lcbmhc,
+        .st-emotion-cache-1d391kg, .st-emotion-cache-17eq0hr,
+        section[data-testid="stSidebar"], section[data-testid="stSidebar"] > div,
+        .stSidebar, .sidebar, [data-testid="stSidebar"],
+        .css-1aumxhk, .css-1cypcdb, .css-1outpf7, .css-1v0mbdj {
+            background: linear-gradient(180deg, #1a365d 0%, #2d3748 50%, #1a202c 100%) !important;
+            border-right: 2px solid #4a5568 !important;
             color: white !important;
         }
         
-        .css-1d391kg h1, .css-1lcbmhc h1, .css-17eq0hr h1, .st-emotion-cache-16txtl3 h1, .st-emotion-cache-1y4p8pa h1,
-        .css-1d391kg h2, .css-1lcbmhc h2, .css-17eq0hr h2, .st-emotion-cache-16txtl3 h2, .st-emotion-cache-1y4p8pa h2,
-        .css-1d391kg h3, .css-1lcbmhc h3, .css-17eq0hr h3, .st-emotion-cache-16txtl3 h3, .st-emotion-cache-1y4p8pa h3,
-        .css-1d391kg p, .css-1lcbmhc p, .css-17eq0hr p, .st-emotion-cache-16txtl3 p, .st-emotion-cache-1y4p8pa p {
+        /* Force ALL text in sidebar to be white - NUCLEAR OPTION */
+        section[data-testid="stSidebar"] * {
             color: white !important;
         }
         
-        /* Sidebar Radio Buttons */
-        .css-1d391kg .stRadio label, .css-1lcbmhc .stRadio label, .css-17eq0hr .stRadio label, .st-emotion-cache-16txtl3 .stRadio label, .st-emotion-cache-1y4p8pa .stRadio label {
+        /* Target specific text elements */
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] span,
+        section[data-testid="stSidebar"] div,
+        section[data-testid="stSidebar"] label,
+        section[data-testid="stSidebar"] .stMarkdown {
             color: white !important;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2) !important;
         }
         
-        /* Sidebar Checkboxes */
-        .css-1d391kg .stCheckbox label, .css-1lcbmhc .stCheckbox label, .css-17eq0hr .stCheckbox label, .st-emotion-cache-16txtl3 .stCheckbox label, .st-emotion-cache-1y4p8pa .stCheckbox label {
+        /* Form elements in sidebar */
+        section[data-testid="stSidebar"] .stRadio label,
+        section[data-testid="stSidebar"] .stCheckbox label,
+        section[data-testid="stSidebar"] .stSelectbox label,
+        section[data-testid="stSidebar"] .stTextInput label {
             color: white !important;
+            font-weight: 500 !important;
         }
         
-        /* Sidebar Selectbox */
-        .css-1d391kg .stSelectbox label, .css-1lcbmhc .stSelectbox label, .css-17eq0hr .stSelectbox label, .st-emotion-cache-16txtl3 .stSelectbox label, .st-emotion-cache-1y4p8pa .stSelectbox label {
-            color: white !important;
+        /* Status messages in sidebar */
+        section[data-testid="stSidebar"] .stSuccess {
+            background-color: rgba(72, 187, 120, 0.2) !important;
+            border: 2px solid #48bb78 !important;
+            color: #c6f6d5 !important;
+            border-radius: 8px !important;
         }
         
-        /* Sidebar Input Labels */
-        .css-1d391kg .stTextInput label, .css-1lcbmhc .stTextInput label, .css-17eq0hr .stTextInput label, .st-emotion-cache-16txtl3 .stTextInput label, .st-emotion-cache-1y4p8pa .stTextInput label {
-            color: white !important;
+        section[data-testid="stSidebar"] .stWarning {
+            background-color: rgba(237, 137, 54, 0.2) !important;
+            border: 2px solid #ed8936 !important;
+            color: #fbd38d !important;
+            border-radius: 8px !important;
         }
         
-        /* Sidebar Dividers */
-        .css-1d391kg hr, .css-1lcbmhc hr, .css-17eq0hr hr, .st-emotion-cache-16txtl3 hr, .st-emotion-cache-1y4p8pa hr {
-            border-color: rgba(255, 255, 255, 0.2) !important;
+        section[data-testid="stSidebar"] .stError {
+            background-color: rgba(245, 101, 101, 0.2) !important;
+            border: 2px solid #f56565 !important;
+            color: #fed7d7 !important;
+            border-radius: 8px !important;
         }
         
-        /* Sidebar Success/Warning/Error Messages */
-        .css-1d391kg .stSuccess, .css-1lcbmhc .stSuccess, .css-17eq0hr .stSuccess, .st-emotion-cache-16txtl3 .stSuccess, .st-emotion-cache-1y4p8pa .stSuccess {
-            background-color: rgba(40, 167, 69, 0.2) !important;
-            border: 1px solid rgba(40, 167, 69, 0.5) !important;
-            color: #90EE90 !important;
+        section[data-testid="stSidebar"] .stInfo {
+            background-color: rgba(66, 153, 225, 0.2) !important;
+            border: 2px solid #4299e1 !important;
+            color: #bee3f8 !important;
+            border-radius: 8px !important;
         }
-        
-        .css-1d391kg .stWarning, .css-1lcbmhc .stWarning, .css-17eq0hr .stWarning, .st-emotion-cache-16txtl3 .stWarning, .st-emotion-cache-1y4p8pa .stWarning {
-            background-color: rgba(255, 193, 7, 0.2) !important;
-            border: 1px solid rgba(255, 193, 7, 0.5) !important;
-            color: #FFE066 !important;
-        }
-        
-        .css-1d391kg .stError, .css-1lcbmhc .stError, .css-17eq0hr .stError, .st-emotion-cache-16txtl3 .stError, .st-emotion-cache-1y4p8pa .stError {
-            background-color: rgba(220, 53, 69, 0.2) !important;
-            border: 1px solid rgba(220, 53, 69, 0.5) !important;
-            color: #FFB3BA !important;
-        }
-        
-        .css-1d391kg .stInfo, .css-1lcbmhc .stInfo, .css-17eq0hr .stInfo, .st-emotion-cache-16txtl3 .stInfo, .st-emotion-cache-1y4p8pa .stInfo {
-            background-color: rgba(23, 162, 184, 0.2) !important;
-            border: 1px solid rgba(23, 162, 184, 0.5) !important;
-            color: #87CEEB !important;
-        }
-        
         /* Main Content Area */
         .main .block-container {
             padding-top: {cls.SPACING['lg']};
