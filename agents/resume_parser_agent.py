@@ -118,7 +118,7 @@ class ResumeParserAgent(MultiAIAgent):
 
         try:
             # Try AI parsing
-            ai_response = self.generate_response(prompt)
+            ai_response = self.generate_ai_response(prompt)
             
             # Clean and parse the response
             cleaned_response = self.clean_json_response(ai_response)
