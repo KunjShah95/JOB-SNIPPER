@@ -11,7 +11,7 @@ class ResumeParserAgent(MultiAIAgent):
             name="ResumeParserAgent",
             use_gemini=True,
             use_mistral=True,
-            return_mode="compare",  # Use compare to see both model outputs
+        )
     def process(self, input_data):
         """Implementation of abstract process method from Agent base class"""
         # Convert input_data to the expected message format for run() method
