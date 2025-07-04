@@ -123,7 +123,7 @@ class SalaryNegotiationAgent(MultiAIAgent):
             Return as JSON format with detailed breakdowns.
             """
 
-            response = self.generate_response(prompt)
+            response = self.generate_ai_response(prompt)
 
             try:
                 market_data = json.loads(response)
