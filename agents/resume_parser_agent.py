@@ -100,8 +100,8 @@ class ResumeParserAgent(MultiAIAgent):
             ],
             "skills": [
                 "skill1", "skill2", "skill3"
-            ],
-            "certifications": [
+                    "technologies": ["tech1", "tech2"]
+                }
                 "certification1", "certification2"
             ],
             "projects": [
