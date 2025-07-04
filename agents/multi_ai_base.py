@@ -76,6 +76,51 @@ class MultiAIAgent(Agent):
         self.user_context = user_context or {}
         self.setup_ai_clients()
 
+    def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Default implementation of abstract process method from Agent base class.
+
+        This method provides a default implementation that child classes can override.
+        It converts input_data to a prompt and uses the AI generation capabilities.
+
+        Args:
+            input_data: Dictionary containing the data to process
+
+        Returns:
+            Dictionary containing the processed results
+        """
+        try:
+            # Default behavior: convert input to string and generate response
+            if isinstance(input_data, dict):
+                # Try to extract meaningful prompt from input_data
+                if "prompt" in input_data:
+                    prompt = input_data["prompt"]
+                elif "data" in input_data:
+                    prompt = f"Process this data: {input_data['data']}"
+                else:
+                    prompt = f"Process this input: {input_data}"
+            else:
+                prompt = f"Process this input: {input_data}"
+
+            # Generate response using AI
+            response = self.generate_ai_response(prompt)
+
+            # Return structured result
+            return {
+                "success": True,
+                "result": response,
+                "input": input_data,
+                "agent": self.name,
+            }
+
+        except Exception as e:
+            # Return error response
+            return {
+                "success": False,
+                "error": str(e),
+                "input": input_data,
+                "agent": self.name,
+            }
+
     def setup_ai_clients(self):
         """Setup both Gemini and Mistral clients if available"""
         # Setup Gemini
