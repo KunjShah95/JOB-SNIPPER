@@ -21,36 +21,36 @@ class JobMatcherAgent(MultiAIAgent):
             "AI Researcher": ["AI", "NLP", "ML", "PyTorch"],
             "Software Engineer": ["Java", "Python", "JavaScript", "AWS"],
         }
+        }
+    
+    def process(self, input_data):
+        """Implementation of abstract process method from Agent base class"""
+        try:
+            # Convert input_data to the expected message format for run() method
+            if isinstance(input_data, dict) and 'data' in input_data:
+                # If input_data already has the expected structure
+                from agents.message_protocol import AgentMessage
+                message = AgentMessage(sender="user", recipient=self.name, data=input_data['data'])
+                result_json = self.run(message.to_json())
+            else:
+                # Assume input_data is the parsed resume data directly
+                from agents.message_protocol import AgentMessage
+                message = AgentMessage(sender="user", recipient=self.name, data=input_data)
+                result_json = self.run(message.to_json())
+            
+            # Parse the result
+            result = json.loads(result_json) if isinstance(result_json, str) else result_json
+            
+            # Extract the actual data from the message format
+            if isinstance(result, dict) and 'data' in result:
+                return result['data']
+            else:
+                return result
+                
+        except Exception as e:
+            logging.error(f"Error in JobMatcherAgent.process: {e}")
+            return self.fallback_matching(input_data)
 
-    def run(self, message_json):
-        msg = AgentMessage.from_json(message_json)
-        parsed_resume = msg.data
-
-        # Handle various input formats
-        if isinstance(parsed_resume, str):
-            try:
-                parsed_resume = json.loads(parsed_resume)
-            except json.JSONDecodeError as e:
-                logging.error(f"Failed to decode resume JSON: {e}")
-                parsed_resume = {"skills": []}
-
-        if not isinstance(parsed_resume, dict):
-            logging.error(f"Expected dict, got {type(parsed_resume)}")
-            parsed_resume = {"skills": []}
-
-        if "skills" not in parsed_resume or not isinstance(
-            parsed_resume["skills"], list
-        ):
-            logging.warning(
-                "No skills found in parsed resume or skills not in list format"
-            )
-            parsed_resume["skills"] = []
-
-        prompt = f"""Analyze these skills from a resume and provide job matching information in JSON format:
-
-Resume Skills: {parsed_resume.get("skills", [])}
-
-Years of Experience: {parsed_resume.get("years_of_experience", 0)}
 
 Provide the following in your response:
 1. matched_skills: A list of skills that match with top job requirements
