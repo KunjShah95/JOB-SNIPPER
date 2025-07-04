@@ -100,12 +100,12 @@ class ResumeParserAgent(MultiAIAgent):
             ],
             "skills": [
                 "skill1", "skill2", "skill3"
-            ai_response = self.generate_ai_response(prompt)
+            ],
             "certifications": [
                 "certification1", "certification2"
             ],
             "projects": [
-                {{
+                {
                     "name": "Project Name",
                     "description": "Project description",
                     "technologies": ["tech1", "tech2"]
