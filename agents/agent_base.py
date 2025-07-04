@@ -141,9 +141,9 @@ class Agent(ABC):
             'successful_requests': 0,
             'failed_requests': 0,
             'average_response_time': 0.0
-        }
-        self.logger.info("Metrics reset")
         
+    def __str__(self) -> str:
+        return f"{self.name} v{self.version}"
         
     def __repr__(self) -> str:
         return f"Agent(name='{self.name}', version='{self.version}')"
