@@ -13,8 +13,8 @@ class ResumeParserAgent(MultiAIAgent):
             use_mistral=True,
             return_mode="compare"  # Use compare to see both model outputs
         )
-        """Implementation of abstract process method from Agent base class"""
-        # Convert input_data to the expected message format for run() method
+    
+    def process(self, input_data):
         if isinstance(input_data, dict) and 'data' in input_data:
             # If input_data already has the expected structure
             from agents.message_protocol import AgentMessage
