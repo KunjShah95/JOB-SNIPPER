@@ -15,8 +15,8 @@ class ResumeParserAgent(MultiAIAgent):
         )
     
     def process(self, input_data):
-        if isinstance(input_data, dict) and 'data' in input_data:
-            # If input_data already has the expected structure
+        """Implementation of abstract process method from Agent base class"""
+        # Convert input_data to the expected message format for run() method
             from agents.message_protocol import AgentMessage
             message = AgentMessage(sender="user", recipient=self.name, data=input_data['data'])
             return json.loads(self.run(message.to_json()))
