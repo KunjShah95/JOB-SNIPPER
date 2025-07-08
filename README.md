@@ -1,118 +1,118 @@
-# JobSniper AI – Professional Resume & Career Intelligence Platform
+# 🎯 JobSniper AI
 
----
+**AI-Powered Resume Analysis & Job Matching Platform**
 
-## 🏗️ System Architecture
+A modern, clean, and deployable job matching application that analyzes resumes and finds the best job matches using AI.
 
-### High-Level Architecture
+## ✨ Features
 
-```mermaid
-flowchart TD
-    subgraph ui[Streamlit Web UI]
-        app[app.py]
-    end
-    subgraph agents[AI Agents]
-        controller[ControllerAgent]
-        auto_apply[AutoApplyAgent]
-        recruiter[RecruiterViewAgent]
-        skill[SkillRecommendationAgent]
-        fallback[AgentFallbackHandler]
-    end
-    subgraph utils[Utilities & Storage]
-        pdf[PDF Reader]
-        logger[SQLite Logger]
-        exporter[PDF/Email Exporter]
-    end
+- 📄 **Resume Analysis**: Upload and analyze resumes (PDF, DOCX, TXT)
+- 🎯 **Job Matching**: AI-powered job recommendations based on skills
+- 📊 **Analytics Dashboard**: Track your job search progress
+- 🎨 **Modern UI**: Clean, responsive Streamlit interface
+- 🚀 **Easy Deployment**: Ready for Streamlit Cloud, Heroku, or Docker
 
-    app --> controller
-    app --> auto_apply
-    app --> recruiter
-    app --> skill
-    app --> fallback
-    app --> pdf
-    app --> logger
-    app --> exporter
-    controller --> fallback
-    auto_apply --> fallback
-    recruiter --> fallback
-    skill --> fallback
+## 🚀 Quick Start
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/KunjShah95/JOB-SNIPPER.git
+cd JOB-SNIPPER
+git checkout complete-revamp
 ```
 
-> **Tip:** If viewing this on GitHub and the diagram does not render, you can copy the code above to [Mermaid Live Editor](https://mermaid.live/) to view and export the image, or use a Markdown viewer with Mermaid support.
+### 2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the application
+```bash
+streamlit run app.py
+```
+
+### 4. Open in browser
+Navigate to `http://localhost:8501` to use the application.
+
+## 🎮 Demo Mode
+
+The application runs in demo mode by default with:
+- Mock resume analysis
+- Sample job matches
+- No external API dependencies
+
+## 🔧 Configuration (Optional)
+
+For enhanced AI features, create a `.env` file:
+
+```env
+# Optional: Add AI API keys for enhanced functionality
+GEMINI_API_KEY=your_gemini_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+## 📱 Deployment
+
+### Streamlit Cloud
+1. Fork this repository
+2. Connect to [Streamlit Cloud](https://streamlit.io/cloud)
+3. Deploy the `complete-revamp` branch
+4. Set `app.py` as the main file
+
+### Docker
+```bash
+# Build image
+docker build -t jobsniper-ai .
+
+# Run container
+docker run -p 8501:8501 jobsniper-ai
+```
+
+## 🛠️ Technology Stack
+
+- **Frontend**: Streamlit
+- **Backend**: Python
+- **AI**: Google Gemini / OpenAI (optional)
+- **File Processing**: PyPDF2, python-docx
+- **Data**: Pandas, NumPy
+
+## 📊 Features Overview
+
+### Resume Analysis
+- Extract skills and experience
+- Calculate match scores
+- Provide improvement recommendations
+
+### Job Matching
+- AI-powered job recommendations
+- Skill-based matching algorithm
+- Filter by location, salary, and match score
+
+### Analytics
+- Track analysis history
+- Skill frequency analysis
+- Progress visualization
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+## 🆘 Support
+
+- 📧 Email: [your-email@example.com](mailto:your-email@example.com)
+- 🐛 Issues: [GitHub Issues](https://github.com/KunjShah95/JOB-SNIPPER/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/KunjShah95/JOB-SNIPPER/discussions)
 
 ---
 
-JobSniper AI is a modern, modular, and scalable AI-powered resume analysis and career intelligence platform. It leverages multiple AI providers, robust PDF parsing, and a clean Streamlit UI to deliver actionable insights for job seekers and recruiters.
-
-## 🚀 Features
-- **Multi-AI Support:** Google Gemini (primary), Mistral AI (fallback), and Demo Mode
-- **Resume Analysis:** Intelligent parsing, skill extraction, and feedback
-- **Job Matching:** Smart skill/job alignment and scoring
-- **Resume Tailoring:** Personalized improvement suggestions
-- **Job Description Generation:** AI-powered, role-specific JDs
-- **Export & Email:** PDF reports and email delivery
-- **HR/Recruiter Tools:** Candidate evaluation and analytics
-- **Skill Development:** Gap analysis and personalized learning roadmap
-
----
-
-## Component Breakdown
-
-### 1. UI Layer (Streamlit)
-- `ui/app.py`: Main entry point, handles all user interaction, navigation, and visualization.
-- Responsive dashboard for job seekers and recruiters.
-- Uploads resumes, triggers analysis, and displays results.
-
-### 2. AI Agents Layer
-- `agents/controller_agent.py`: Orchestrates resume analysis and job matching.
-- `agents/auto_apply_agent.py`: Automates job application generation.
-- `agents/recruiter_view_agent.py`: HR/recruiter candidate evaluation.
-- `agents/skill_recommendation_agent.py`: Skill gap analysis and learning roadmap.
-- `agents/agent_fallback.py`: Provides robust fallback logic and demo data.
-
-### 3. Utilities & Storage
-- `utils/pdf_reader.py`: Extracts text from PDF resumes.
-- `utils/sqlite_logger.py`: Logs user actions and analysis history.
-- `utils/exporter.py`: Generates PDF reports and handles email delivery.
-- `utils/config.py`: Loads API keys and environment settings.
-
----
-
-## Data Flow
-1. **User uploads resume** via UI.
-2. **PDF Reader** extracts text.
-3. **Controller Agent** (or fallback) analyzes resume, matches skills, and generates feedback.
-4. **Results** are displayed in the UI and can be exported/emailed.
-5. **Skill Agent** provides gap analysis and learning roadmap.
-6. **Recruiter Agent** enables HR evaluation workflows.
-
----
-
-## 🛠️ Installation
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd job-snipper-ai
-   ```
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Configure API Keys**
-   - Copy `.env.example` to `.env` and fill in your API keys and email credentials.
-
----
-
-## 🔑 API & Email Configuration
-- **Google Gemini**: [Get API Key](https://aistudio.google.com/app/apikey)
-- **Mistral AI**: [Get API Key](https://console.mistral.ai/)
-- **Email (Gmail recommended)**: Enable 2FA, create an App Password, and set `SENDER_EMAIL`/`SENDER_PASSWORD` in `.env`.
-
----
-
-## 🎯 Usage
-- **Run the app:**
-  ```bash
+**Built with ❤️ by [Kunj Shah](https://github.com/KunjShah95)**
   streamlit run ui/app.py
   ```
 - **Demo Mode:**
