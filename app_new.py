@@ -1,4 +1,4 @@
-import streamlit as st
+# Rename this file to app.py after deployment
 import os
 import tempfile
 import logging
