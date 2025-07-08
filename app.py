@@ -1,18 +1,16 @@
-#!/usr/bin/env python3
-"""
-JobSniper AI - Modern Job Matching Platform
-A clean, deployable job matching and resume analysis tool
-"""
-
 import streamlit as st
 import os
-import sys
-from pathlib import Path
+import tempfile
 import logging
 from datetime import datetime
 import json
-import io
-import base64
+from typing import Dict, List, Optional
+
+# Import core modules
+from core.file_processor import FileProcessor
+from core.security import SecurityValidator
+from core.ai_engine import ai_engine, AnalysisResult
+from utils.analytics import AnalyticsTracker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,355 +18,357 @@ logger = logging.getLogger(__name__)
 
 # Page configuration
 st.set_page_config(
-    page_title="JobSniper AI",
+    page_title="Job Snipper AI - Advanced Resume Analysis",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for modern UI
-st.markdown("""
-<style>
-    .main-header {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
-        border-radius: 10px;
-        color: white;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    
-    .feature-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        border-left: 4px solid #667eea;
-        margin-bottom: 1rem;
-    }
-    
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-    }
-    
-    .sidebar-content {
-        background: linear-gradient(180deg, #1a365d 0%, #2d3748 50%, #1a202c 100%);
-        padding: 1rem;
-        border-radius: 10px;
-        color: white;
-    }
-    
-    .success-box {
-        background: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-        padding: 1rem;
-        border-radius: 5px;
-        margin: 1rem 0;
-    }
-    
-    .warning-box {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-        padding: 1rem;
-        border-radius: 5px;
-        margin: 1rem 0;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Initialize session state
+if 'analysis_history' not in st.session_state:
+    st.session_state.analysis_history = []
+if 'current_analysis' not in st.session_state:
+    st.session_state.current_analysis = None
 
-class JobSniperAI:
-    """Main JobSniper AI Application Class"""
+# Initialize components
+file_processor = FileProcessor()
+analytics = AnalyticsTracker()
+
+def main():
+    """Main application function"""
+    # Header
+    st.title("🎯 Job Snipper AI")
+    st.markdown("**Advanced Resume Analysis & Job Matching Platform**")
     
-    def __init__(self):
-        self.setup_session_state()
-        
-    def setup_session_state(self):
-        """Initialize session state variables"""
-        if 'resume_data' not in st.session_state:
-            st.session_state.resume_data = None
-        if 'job_matches' not in st.session_state:
-            st.session_state.job_matches = []
-        if 'analysis_history' not in st.session_state:
-            st.session_state.analysis_history = []
-    
-    def render_header(self):
-        """Render the main header"""
-        st.markdown("""
-        <div class="main-header">
-            <h1>🎯 JobSniper AI</h1>
-            <p>AI-Powered Resume Analysis & Job Matching Platform</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    def render_sidebar(self):
-        """Render the sidebar navigation"""
-        with st.sidebar:
-            st.markdown("### 🎯 JobSniper AI")
-            st.markdown("---")
-            
-            # Navigation
-            page = st.selectbox(
-                "Navigate to:",
-                ["🏠 Dashboard", "📄 Resume Analysis", "🎯 Job Matching", 
-                 "📊 Analytics", "⚙️ Settings"],
-                key="navigation"
-            )
-            
-            st.markdown("---")
-            
-            # Quick stats
-            st.markdown("### 📊 Quick Stats")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Resumes Analyzed", len(st.session_state.analysis_history))
-            with col2:
-                st.metric("Job Matches", len(st.session_state.job_matches))
-            
-            st.markdown("---")
-            
-            # System status
-            st.markdown("### 🔧 System Status")
-            st.success("✅ AI Engine: Active")
-            st.info("📡 API: Connected")
-            st.warning("🔑 Demo Mode: Active")
-            
-            return page
-    
-    def parse_resume_text(self, text):
-        """Parse resume text and extract key information"""
-        # Simple text analysis for demo
-        lines = text.split('\n')
-        
-        # Extract basic information
-        skills = []
-        experience = []
-        education = []
-        
-        current_section = None
-        
-        for line in lines:
-            line = line.strip().lower()
-            
-            if any(keyword in line for keyword in ['skill', 'technical', 'programming']):
-                current_section = 'skills'
-            elif any(keyword in line for keyword in ['experience', 'work', 'employment']):
-                current_section = 'experience'
-            elif any(keyword in line for keyword in ['education', 'degree', 'university']):
-                current_section = 'education'
-            
-            # Extract skills
-            if current_section == 'skills' or any(skill in line for skill in 
-                ['python', 'java', 'javascript', 'react', 'sql', 'machine learning', 'ai']):
-                for skill in ['python', 'java', 'javascript', 'react', 'sql', 'machine learning', 'ai', 'data science']:
-                    if skill in line and skill not in skills:
-                        skills.append(skill.title())
-        
-        # Generate mock data if no skills found
-        if not skills:
-            skills = ['Python', 'Data Analysis', 'Machine Learning', 'SQL']
-        
-        return {
-            'skills': skills[:10],  # Limit to top 10
-            'experience_years': min(len(experience) + 2, 10),
-            'education_level': 'Bachelor\'s Degree',
-            'total_score': min(85 + len(skills) * 2, 100)
-        }
-    
-    def generate_job_matches(self, resume_data):
-        """Generate job matches based on resume data"""
-        # Mock job matches based on skills
-        job_templates = [
-            {
-                'title': 'Senior Data Scientist',
-                'company': 'TechCorp Inc.',
-                'location': 'San Francisco, CA',
-                'salary': '$120,000 - $150,000',
-                'match_score': 92,
-                'required_skills': ['Python', 'Machine Learning', 'SQL', 'Data Analysis'],
-                'description': 'Lead data science initiatives and build ML models.'
-            },
-            {
-                'title': 'Machine Learning Engineer',
-                'company': 'AI Innovations',
-                'location': 'New York, NY',
-                'salary': '$110,000 - $140,000',
-                'match_score': 88,
-                'required_skills': ['Python', 'Machine Learning', 'AI'],
-                'description': 'Develop and deploy ML models in production.'
-            },
-            {
-                'title': 'Data Analyst',
-                'company': 'DataFlow Solutions',
-                'location': 'Austin, TX',
-                'salary': '$80,000 - $100,000',
-                'match_score': 85,
-                'required_skills': ['SQL', 'Data Analysis', 'Python'],
-                'description': 'Analyze data and create insights for business decisions.'
-            },
-            {
-                'title': 'Software Developer',
-                'company': 'CodeCraft LLC',
-                'location': 'Seattle, WA',
-                'salary': '$90,000 - $120,000',
-                'match_score': 78,
-                'required_skills': ['Python', 'JavaScript', 'SQL'],
-                'description': 'Build web applications and software solutions.'
-            }
-        ]
-        
-        # Filter and score based on resume skills
-        user_skills = set(skill.lower() for skill in resume_data['skills'])
-        
-        for job in job_templates:
-            job_skills = set(skill.lower() for skill in job['required_skills'])
-            skill_overlap = len(user_skills.intersection(job_skills))
-            total_skills = len(job_skills)
-            
-            # Adjust match score based on skill overlap
-            if total_skills > 0:
-                skill_match_ratio = skill_overlap / total_skills
-                job['match_score'] = int(job['match_score'] * (0.7 + 0.3 * skill_match_ratio))
-        
-        # Sort by match score
-        job_templates.sort(key=lambda x: x['match_score'], reverse=True)
-        
-        return job_templates
-    
-    def render_dashboard(self):
-        """Render the main dashboard"""
-        st.markdown("## 🏠 Dashboard")
-        
-        # Key metrics
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.markdown("""
-            <div class="metric-card">
-                <h3>📄</h3>
-                <h2>{}</h2>
-                <p>Resumes Analyzed</p>
-            </div>
-            """.format(len(st.session_state.analysis_history)), unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown("""
-            <div class="metric-card">
-                <h3>🎯</h3>
-                <h2>{}</h2>
-                <p>Job Matches</p>
-            </div>
-            """.format(len(st.session_state.job_matches)), unsafe_allow_html=True)
-        
-        with col3:
-            avg_score = 0
-            if st.session_state.analysis_history:
-                avg_score = sum(item.get('total_score', 0) for item in st.session_state.analysis_history) / len(st.session_state.analysis_history)
-            
-            st.markdown("""
-            <div class="metric-card">
-                <h3>📊</h3>
-                <h2>{}%</h2>
-                <p>Avg Match Score</p>
-            </div>
-            """.format(int(avg_score)), unsafe_allow_html=True)
-        
-        with col4:
-            st.markdown("""
-            <div class="metric-card">
-                <h3>🚀</h3>
-                <h2>Active</h2>
-                <p>AI Status</p>
-            </div>
-            """, unsafe_allow_html=True)
+    # Sidebar navigation
+    with st.sidebar:
+        st.header("🚀 Navigation")
+        page = st.selectbox(
+            "Choose a feature:",
+            ["Resume Analysis", "Job Matching", "Skill Recommendations", "Analytics Dashboard"]
+        )
         
         st.markdown("---")
+        st.markdown("### 📊 Quick Stats")
+        st.metric("Analyses Today", len(st.session_state.analysis_history))
         
-        # Recent activity
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### 📈 Recent Activity")
-            if st.session_state.analysis_history:
-                for i, analysis in enumerate(st.session_state.analysis_history[-3:]):
-                    st.markdown(f"""
-                    <div class="feature-card">
-                        <strong>Analysis #{i+1}</strong><br>
-                        Skills: {len(analysis.get('skills', []))}<br>
-                        Score: {analysis.get('total_score', 0)}%
-                    </div>
-                    """, unsafe_allow_html=True)
-            else:
-                st.info("No recent activity. Upload a resume to get started!")
-        
-        with col2:
-            st.markdown("### 🎯 Top Job Matches")
-            if st.session_state.job_matches:
-                for job in st.session_state.job_matches[:3]:
-                    st.markdown(f"""
-                    <div class="feature-card">
-                        <strong>{job['title']}</strong><br>
-                        {job['company']}<br>
-                        Match: {job['match_score']}%
-                    </div>
-                    """, unsafe_allow_html=True)
-            else:
-                st.info("No job matches yet. Analyze a resume first!")
+        if st.session_state.current_analysis:
+            st.metric("Last Score", f"{st.session_state.current_analysis.score:.1%}")
     
-    def render_resume_analysis(self):
-        """Render the resume analysis page"""
-        st.markdown("## 📄 Resume Analysis")
+    # Route to selected page
+    if page == "Resume Analysis":
+        resume_analysis_page()
+    elif page == "Job Matching":
+        job_matching_page()
+    elif page == "Skill Recommendations":
+        skill_recommendations_page()
+    elif page == "Analytics Dashboard":
+        analytics_dashboard_page()
+
+def resume_analysis_page():
+    """Resume analysis page with security validation"""
+    st.header("📄 Resume Analysis")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.subheader("Upload Resume")
         
-        # File upload
         uploaded_file = st.file_uploader(
-            "Upload your resume",
-            type=['pdf', 'docx', 'txt'],
-            help="Supported formats: PDF, DOCX, TXT"
+            "Choose your resume file",
+            type=['pdf', 'doc', 'docx', 'txt'],
+            help="Supported formats: PDF, DOC, DOCX, TXT (Max 10MB)"
         )
         
-        # Text input as alternative
-        st.markdown("### Or paste your resume text:")
-        resume_text = st.text_area(
-            "Resume content",
-            height=200,
-            placeholder="Paste your resume content here..."
-        )
-        
-        if uploaded_file is not None or resume_text:
-            if st.button("🔍 Analyze Resume", type="primary"):
-                with st.spinner("Analyzing resume..."):
-                    # Process the resume
-                    if uploaded_file:
-                        # For demo, we'll use the filename as text
-                        text_content = f"Resume file: {uploaded_file.name}\nDemo content for analysis."
-                    else:
-                        text_content = resume_text
-                    
-                    # Parse resume
-                    resume_data = self.parse_resume_text(text_content)
-                    st.session_state.resume_data = resume_data
-                    
-                    # Add to history
-                    analysis_record = {
-                        'timestamp': datetime.now().isoformat(),
-                        'filename': uploaded_file.name if uploaded_file else 'Text Input',
-                        **resume_data
-                    }
-                    st.session_state.analysis_history.append(analysis_record)
-                    
-                    # Generate job matches
-                    job_matches = self.generate_job_matches(resume_data)
-                    st.session_state.job_matches = job_matches
+        if uploaded_file is not None:
+            # Security validation
+            with st.spinner("Validating file security..."):
+                # Save to temporary file for validation
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f".{uploaded_file.name.split('.')[-1]}") as tmp_file:
+                    tmp_file.write(uploaded_file.getvalue())
+                    tmp_path = tmp_file.name
                 
-                st.success("✅ Resume analysis complete!")
+                # Validate file
+                is_valid, error_msg = SecurityValidator.validate_file(
+                    tmp_path, ['pdf', 'doc', 'docx', 'txt']
+                )
+                
+                if not is_valid:
+                    st.error(f"❌ File validation failed: {error_msg}")
+                    os.unlink(tmp_path)
+                    return
+                
+                st.success("✅ File validated successfully")
+            
+            # Process file
+            with st.spinner("Processing resume..."):
+                try:
+                    # Extract text
+                    resume_text = file_processor.extract_text(tmp_path)
+                    
+                    if not resume_text or len(resume_text.strip()) < 50:
+                        st.error("❌ Could not extract meaningful text from the resume")
+                        os.unlink(tmp_path)
+                        return
+                    
+                    # AI Analysis
+                    analysis_result = ai_engine.analyze_resume(resume_text)
+                    
+                    # Store in session
+                    st.session_state.current_analysis = analysis_result
+                    st.session_state.analysis_history.append({
+                        'filename': uploaded_file.name,
+                        'timestamp': datetime.now(),
+                        'score': analysis_result.score
+                    })
+                    
+                    # Track analytics
+                    analytics.track_analysis(uploaded_file.name, analysis_result.score)
+                    
+                    st.success("✅ Resume analyzed successfully!")
+                    
+                except Exception as e:
+                    logger.error(f"Error processing resume: {e}")
+                    st.error(f"❌ Error processing resume: {str(e)}")
+                finally:
+                    # Clean up temp file
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
+    
+    with col2:
+        st.subheader("Analysis Tips")
+        st.info("""
+        📝 **Best Practices:**
+        - Use clear section headers
+        - Include relevant keywords
+        - Quantify achievements
+        - Keep format consistent
+        """)
+    
+    # Display results
+    if st.session_state.current_analysis:
+        display_analysis_results(st.session_state.current_analysis)
+
+def display_analysis_results(analysis: AnalysisResult):
+    """Display comprehensive analysis results"""
+    st.markdown("---")
+    st.header("📊 Analysis Results")
+    
+    # Overall score
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        score_color = "🟢" if analysis.score > 0.7 else "🟡" if analysis.score > 0.4 else "🔴"
+        st.metric(
+            f"{score_color} Overall Score",
+            f"{analysis.score:.1%}",
+            help="Based on AI analysis of content, structure, and completeness"
+        )
+    
+    with col2:
+        st.metric(
+            "🎯 Confidence",
+            f"{analysis.confidence:.1%}",
+            help="AI confidence in the analysis"
+        )
+    
+    with col3:
+        skills_count = len(analysis.details.get('extracted_skills', []))
+        st.metric(
+            "🛠️ Skills Found",
+            skills_count,
+            help="Number of technical skills identified"
+        )
+    
+    # Detailed breakdown
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("🛠️ Extracted Skills")
+        skills = analysis.details.get('extracted_skills', [])
+        if skills:
+            for skill in skills[:10]:  # Show top 10
+                st.badge(skill.title())
+        else:
+            st.info("No technical skills detected")
         
-        # Display results
-        if st.session_state.resume_data:
+        st.subheader("📈 Structure Analysis")
+        structure_score = analysis.details.get('structure_score', 0)
+        st.progress(structure_score, text=f"Structure Quality: {structure_score:.1%}")
+    
+    with col2:
+        st.subheader("💡 Recommendations")
+        for i, rec in enumerate(analysis.recommendations, 1):
+            st.write(f"{i}. {rec}")
+        
+        # Experience and Education
+        experience = analysis.details.get('experience', [])
+        education = analysis.details.get('education', [])
+        
+        if experience:
+            st.subheader("💼 Experience Found")
+            for exp in experience[:3]:  # Show top 3
+                st.write(f"• {exp.get('title', 'N/A')} at {exp.get('company', 'N/A')}")
+        
+        if education:
+            st.subheader("🎓 Education Found")
+            for edu in education[:2]:  # Show top 2
+                st.write(f"• {edu.get('institution', 'N/A')}")
+
+def job_matching_page():
+    """Job matching page"""
+    st.header("🎯 Job Matching")
+    
+    if not st.session_state.current_analysis:
+        st.warning("⚠️ Please analyze a resume first in the Resume Analysis section")
+        return
+    
+    st.subheader("Job Description")
+    job_description = st.text_area(
+        "Paste the job description here:",
+        height=200,
+        placeholder="Paste the complete job description including requirements, responsibilities, and qualifications..."
+    )
+    
+    if st.button("🔍 Analyze Job Match", type="primary"):
+        if job_description.strip():
+            with st.spinner("Analyzing job match..."):
+                # Get resume text from previous analysis
+                # For demo, we'll use a placeholder - in real app, store resume text
+                resume_text = "Sample resume text"  # This should come from stored analysis
+                
+                # Analyze job match
+                match_analysis = ai_engine.analyze_resume(resume_text, job_description)
+                
+                # Display match results
+                st.success("✅ Job match analysis complete!")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    match_score = match_analysis.details.get('job_match_score', 0.5)
+                    st.metric("🎯 Match Score", f"{match_score:.1%}")
+                    st.progress(match_score, text=f"Job Compatibility: {match_score:.1%}")
+                
+                with col2:
+                    st.subheader("📋 Match Recommendations")
+                    for rec in match_analysis.recommendations:
+                        st.write(f"• {rec}")
+        else:
+            st.error("❌ Please enter a job description")
+
+def skill_recommendations_page():
+    """Skill recommendations page"""
+    st.header("🛠️ Skill Recommendations")
+    
+    if not st.session_state.current_analysis:
+        st.warning("⚠️ Please analyze a resume first in the Resume Analysis section")
+        return
+    
+    # Current skills
+    current_skills = st.session_state.current_analysis.details.get('extracted_skills', [])
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("🎯 Current Skills")
+        if current_skills:
+            for skill in current_skills:
+                st.badge(skill.title(), type="secondary")
+        else:
+            st.info("No skills detected in resume")
+    
+    with col2:
+        st.subheader("🚀 Recommended Skills")
+        
+        # Generate skill recommendations based on current skills
+        recommended_skills = generate_skill_recommendations(current_skills)
+        
+        for skill in recommended_skills:
+            st.badge(skill, type="primary")
+    
+    # Learning resources
+    st.subheader("📚 Learning Resources")
+    
+    resources = {
+        "Programming": ["Codecademy", "freeCodeCamp", "LeetCode"],
+        "Cloud": ["AWS Training", "Azure Learn", "Google Cloud Skills"],
+        "Data Science": ["Kaggle Learn", "Coursera", "edX"]
+    }
+    
+    for category, platforms in resources.items():
+        with st.expander(f"📖 {category} Resources"):
+            for platform in platforms:
+                st.write(f"• {platform}")
+
+def generate_skill_recommendations(current_skills: List[str]) -> List[str]:
+    """Generate intelligent skill recommendations"""
+    # Skill progression maps
+    skill_maps = {
+        'python': ['django', 'flask', 'fastapi', 'pandas', 'numpy'],
+        'javascript': ['react', 'node.js', 'typescript', 'vue', 'angular'],
+        'java': ['spring', 'hibernate', 'maven', 'gradle', 'junit'],
+        'aws': ['ec2', 's3', 'lambda', 'rds', 'cloudformation'],
+        'docker': ['kubernetes', 'helm', 'istio', 'prometheus', 'grafana']
+    }
+    
+    recommendations = set()
+    
+    for skill in current_skills:
+        skill_lower = skill.lower()
+        if skill_lower in skill_maps:
+            recommendations.update(skill_maps[skill_lower][:3])  # Top 3 recommendations
+    
+    # Add trending skills if no specific recommendations
+    if not recommendations:
+        recommendations = {'machine learning', 'cloud computing', 'devops', 'cybersecurity', 'data analysis'}
+    
+    return list(recommendations)[:6]  # Return top 6
+
+def analytics_dashboard_page():
+    """Analytics dashboard page"""
+    st.header("📊 Analytics Dashboard")
+    
+    if not st.session_state.analysis_history:
+        st.info("📈 No analysis data yet. Analyze some resumes to see insights!")
+        return
+    
+    # Analytics overview
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        total_analyses = len(st.session_state.analysis_history)
+        st.metric("📄 Total Analyses", total_analyses)
+    
+    with col2:
+        avg_score = sum(h['score'] for h in st.session_state.analysis_history) / total_analyses
+        st.metric("📊 Average Score", f"{avg_score:.1%}")
+    
+    with col3:
+        latest_score = st.session_state.analysis_history[-1]['score']
+        st.metric("🎯 Latest Score", f"{latest_score:.1%}")
+    
+    # Analysis history
+    st.subheader("📈 Analysis History")
+    
+    # Create DataFrame for display
+    import pandas as pd
+    df = pd.DataFrame(st.session_state.analysis_history)
+    df['score_percent'] = df['score'].apply(lambda x: f"{x:.1%}")
+    df['timestamp'] = pd.to_datetime(df['timestamp']).dt.strftime('%Y-%m-%d %H:%M')
+    
+    st.dataframe(
+        df[['filename', 'timestamp', 'score_percent']],
+        column_config={
+            'filename': 'File Name',
+            'timestamp': 'Analysis Time',
+            'score_percent': 'Score'
+        },
+        use_container_width=True
+    )
+
+if __name__ == "__main__":
+    main()
             st.markdown("---")
             st.markdown("### 📊 Analysis Results")
             
