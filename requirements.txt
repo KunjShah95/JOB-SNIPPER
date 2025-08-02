@@ -1,21 +1,50 @@
-# JobSniper AI - Core Dependencies
+# JobSniper AI - Complete Dependencies
 streamlit>=1.28.0
 pandas>=2.0.0
 numpy>=1.24.0
 python-dotenv>=1.0.0
 
-# Optional AI providers (uncomment as needed)
-# google-generativeai>=0.3.0
-# openai>=1.0.0
-
 # File processing
 PyPDF2>=3.0.1
 python-docx>=0.8.11
+python-magic>=0.4.27
+python-magic-bin>=0.4.14  # For Windows compatibility
+
+# AI and NLP
+openai>=1.0.0
+transformers>=4.30.0
+torch>=2.0.0
+spacy>=3.6.0
+sentence-transformers>=2.2.0
+
+# PDF Generation
+fpdf2>=2.7.0
+reportlab>=4.0.0
+
+# Email functionality
+yagmail>=0.15.0
+
+# Security
+cryptography>=41.0.0
 
 # Web utilities
 requests>=2.31.0
 beautifulsoup4>=4.12.0
+Pillow>=10.0.0
 
-# Development
+# Data visualization
+plotly>=5.15.0
+matplotlib>=3.7.0
+
+# Development and testing
 pytest>=7.0.0
+black>=23.0.0
+flake8>=6.0.0
 
+# Optional: For better performance
+accelerate>=0.20.0
+sentencepiece>=0.1.99
+
+# Database
+sqlite3  # Built-in with Python
+sqlalchemy>=2.0.0
