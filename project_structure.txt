@@ -1,0 +1,109 @@
+jobsniper-ai-rag/
+│
+├── 📁 agents/
+│   ├── orchestrator_agent/
+│   │   ├── __init__.py
+│   │   ├── agent.py              # A2A orchestrator logic
+│   │   ├── a2a_client.py         # A2A client for agent discovery
+│   │   └── .well-known/
+│   │       └── agent.json        # Agent capabilities manifest
+│   │
+│   ├── parser_agent/
+│   │   ├── __init__.py
+│   │   ├── agent.py              # ADK agent with MCP PDF tool
+│   │   ├── resume_parser.py      # Resume parsing logic
+│   │   └── .well-known/
+│   │       └── agent.json
+│   │
+│   ├── scorer_agent/
+│   │   ├── __init__.py
+│   │   ├── agent.py              # ADK agent for resume scoring
+│   │   ├── scoring_engine.py     # AI-powered scoring logic
+│   │   ├── scoring_criteria.py   # Scoring rubrics
+│   │   └── .well-known/
+│   │       └── agent.json
+│   │
+│   ├── indexing_agent/
+│   │   ├── __init__.py
+│   │   ├── agent.py              # ADK agent for embedding/indexing
+│   │   ├── embeddings.py         # SentenceTransformers integration
+│   │   ├── vector_store.py       # FAISS/Chroma wrapper
+│   │   └── .well-known/
+│   │       └── agent.json
+│   │
+│   └── qa_agent/
+│       ├── __init__.py
+│       ├── agent.py              # ADK agent for QA/RAG
+│       ├── rag_pipeline.py       # RAG implementation
+│       ├── retriever.py          # Vector similarity search
+│       └── .well-known/
+│           └── agent.json
+│
+├── 📁 mcp_servers/
+│   ├── pdf_server/
+│   │   ├── __init__.py
+│   │   ├── server.py             # MCP PDF parsing server
+│   │   ├── pdf_tools.py          # pdfplumber/LlamaParse tools
+│   │   └── requirements.txt
+│   │
+│   └── web_search_server/
+│       ├── __init__.py
+│       ├── server.py             # MCP web search server
+│       ├── search_tools.py       # Google Custom Search
+│       └── requirements.txt
+│
+├── 📁 ui/
+│   ├── __init__.py
+│   ├── streamlit_app.py          # Main Streamlit interface
+│   ├── components/
+│   │   ├── upload_component.py   # Resume upload widget
+│   │   ├── qa_component.py       # QA chat interface
+│   │   ├── scoring_component.py  # Score display widget
+│   │   └── results_component.py  # Search results display
+│   │
+│   └── styles/
+│       ├── main.css              # Custom styling
+│       └── components.css
+│
+├── 📁 shared/
+│   ├── __init__.py
+│   ├── models.py                 # Pydantic data models
+│   ├── config.py                 # Configuration management
+│   ├── utils.py                  # Shared utilities
+│   └── constants.py              # System constants
+│
+├── 📁 data/
+│   ├── vector_store/             # Local vector DB storage
+│   ├── uploads/                  # Temporary file uploads
+│   └── cache/                    # Embedding cache
+│
+├── 📁 tests/
+│   ├── test_agents/
+│   ├── test_mcp_servers/
+│   ├── test_ui/
+│   └── test_integration/
+│
+├── 📁 docker/
+│   ├── Dockerfile.orchestrator
+│   ├── Dockerfile.parser
+│   ├── Dockerfile.scorer
+│   ├── Dockerfile.indexing
+│   ├── Dockerfile.qa
+│   ├── Dockerfile.ui
+│   └── Dockerfile.mcp
+│
+├── 📁 scripts/
+│   ├── setup.py                  # Environment setup
+│   ├── start_agents.py           # Agent startup script
+│   └── health_check.py           # System health monitoring
+│
+├── 📁 docs/
+│   ├── API.md                    # API documentation
+│   ├── DEPLOYMENT.md             # Deployment guide
+│   └── DEVELOPMENT.md            # Development setup
+│
+├── docker-compose.yml            # Multi-service orchestration
+├── requirements.txt              # Python dependencies
+├── .env.example                  # Environment variables template
+├── .gitignore
+└── README.md                     # Project overview

@@ -1,0 +1,16 @@
+streamlit>=1.28.0
+plotly>=5.15.0
+PyPDF2>=3.0.1
+requests>=2.31.0
+python-dotenv>=1.0.0
+google-generativeai>=0.3.0
+mistralai>=0.0.8
+email-validator>=2.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+python-docx>=0.8.11
+reportlab>=4.0.0
+firecrawl-py>=0.0.8
+beautifulsoup4>=4.12.0
+fpdf2>=2.7.0
+yagmail>=0.15.0

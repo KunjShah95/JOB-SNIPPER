@@ -1,0 +1,11 @@
+credentials:
+  usernames:
+    kunj:
+      email: kunj@jobsniper.ai
+      name: Kunj Shah
+      password: '$2b$12$eWZ6mH/xWrhbkR7Q.JzV1OYBGJ1tC10zENMdnE3X7aPDbQMygk2r6'  # password = kunj123
+
+cookie:
+  expiry_days: 1
+  key: some_signature_key
+  name: resume-auth
