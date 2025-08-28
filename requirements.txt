@@ -1,3 +1,4 @@
+# Existing Dependencies
 streamlit>=1.28.0
 plotly>=5.15.0
 PyPDF2>=3.0.1
@@ -14,3 +15,36 @@ firecrawl-py>=0.0.8
 beautifulsoup4>=4.12.0
 fpdf2>=2.7.0
 yagmail>=0.15.0
+
+# New Dependencies for ADK + MCP + A2A + RAG
+# Google ADK (Agent Development Kit)
+google-adk>=0.1.0
+
+# MCP (Model Context Protocol)
+mcp>=1.0.0
+pdfplumber>=0.10.0
+
+# Resume Parsing Enhancement
+pyresparser>=1.0.6
+spacy>=3.7.0
+nltk>=3.8.0
+
+# Vector Database & Embeddings (Free)
+faiss-cpu>=1.7.4
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+
+# RAG & LangChain
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-google-genai>=0.0.5
+
+# A2A Protocol & FastAPI
+fastapi>=0.104.0
+uvicorn>=0.24.0
+httpx>=0.25.0
+pydantic>=2.5.0
+
+# Additional ML/NLP Tools
+scikit-learn>=1.3.0
+transformers>=4.35.0

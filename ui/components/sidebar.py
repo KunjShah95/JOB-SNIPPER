@@ -17,8 +17,11 @@ def sidebar():
         "Application Tracker",
         "Resume Builder",
         "Resume Analysis",
+        "Resume Scoring",  # New AI-powered scoring
         "Job Finder",
         "Job Matching",
+        "Resume Q&A Search",  # New RAG-based search
+        "Analytics Dashboard",  # New analytics & monitoring
         "HR Dashboard",
         "Interview Prep",
         "Skill Recommendations",

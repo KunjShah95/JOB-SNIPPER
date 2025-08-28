@@ -12,7 +12,8 @@ from ui.components.sidebar import sidebar
 from ui.core.design_system import QuantumDesignSystem
 from ui.pages import (
     home, application_tracker, resume_builder, resume_analysis, job_finder, job_matching,
-    hr_dashboard, interview_prep, skill_recommendations, settings
+    hr_dashboard, interview_prep, skill_recommendations, settings, resume_scoring,
+    resume_qa_search, analytics_dashboard
 )
 from utils.config import load_config, validate_config
 from utils.sqlite_logger import init_db
@@ -37,8 +38,11 @@ def main():
         "Application Tracker": application_tracker.render,
         "Resume Builder": resume_builder.render,
         "Resume Analysis": resume_analysis.render,
+        "Resume Scoring": resume_scoring.render,  # New enhanced feature
         "Job Finder": job_finder.render,
         "Job Matching": job_matching.render,
+        "Resume Q&A Search": resume_qa_search.render,  # New RAG feature
+        "Analytics Dashboard": analytics_dashboard.render,  # New analytics
         "HR Dashboard": hr_dashboard.render,
         "Interview Prep": interview_prep.render,
         "Skill Recommendations": skill_recommendations.render,

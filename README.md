@@ -111,14 +111,32 @@ JobSniper AI is a modern, modular, and scalable AI-powered resume analysis and c
 ---
 
 ## 🎯 Usage
-- **Run the app:**
-  ```bash
-  streamlit run ui/app.py
-  ```
-- **Demo Mode:**
-  - Works without API keys using realistic mock data.
-- **Production:**
-  - Add your API keys and email credentials to `.env` for full functionality.
+
+### Basic Mode (Original Features)
+```bash
+# Run the basic application
+streamlit run ui/app.py
+
+# Or use the run script
+python run.py
+```
+
+### Enhanced Mode (NEW - ADK + MCP + A2A + RAG)
+```bash
+# Setup enhanced features
+python setup.py
+
+# Run with Docker (Recommended)
+docker-compose up -d
+
+# Or run enhanced orchestrator directly
+python -m agents.enhanced_orchestrator
+```
+
+### Available Modes:
+- **Demo Mode:** Works without API keys using realistic mock data
+- **Basic Mode:** Original JobSniper AI features with API integration
+- **Enhanced Mode:** NEW features with AI scoring, semantic search, and RAG QA
 
 ---
 

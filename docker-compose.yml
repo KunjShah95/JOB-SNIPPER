@@ -1,0 +1,232 @@
+version: '3.8'
+
+services:
+  # Main Streamlit UI
+  jobsniper-ui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ui
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    volumes:
+      - ./ui:/app/ui
+      - ./utils:/app/utils
+      - ./agents:/app/agents
+      - ./.env:/app/.env
+    depends_on:
+      - enhanced-orchestrator
+      - vector-db
+    networks:
+      - jobsniper-network
+
+  # Enhanced Orchestrator (ADK + A2A)
+  enhanced-orchestrator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.orchestrator
+    ports:
+      - "8000:8000"
+    environment:
+      - AGENT_PORT=8000
+      - AGENT_NAME=enhanced-orchestrator
+    volumes:
+      - ./agents:/app/agents
+      - ./utils:/app/utils
+      - ./.env:/app/.env
+    depends_on:
+      - resume-parser-agent
+      - resume-scorer-agent
+      - rag-qa-agent
+    networks:
+      - jobsniper-network
+
+  # Resume Parser Agent (Enhanced with MCP)
+  resume-parser-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.parser
+    ports:
+      - "8001:8001"
+    environment:
+      - AGENT_PORT=8001
+      - AGENT_NAME=resume-parser
+      - MCP_PDF_SERVER_URL=http://mcp-pdf-server:8010
+    volumes:
+      - ./agents:/app/agents
+      - ./utils:/app/utils
+      - ./.env:/app/.env
+    depends_on:
+      - mcp-pdf-server
+    networks:
+      - jobsniper-network
+
+  # Resume Scorer Agent (NEW)
+  resume-scorer-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.scorer
+    ports:
+      - "8002:8002"
+    environment:
+      - AGENT_PORT=8002
+      - AGENT_NAME=resume-scorer
+    volumes:
+      - ./agents:/app/agents
+      - ./utils:/app/utils
+      - ./.env:/app/.env
+    networks:
+      - jobsniper-network
+
+  # RAG QA Agent (NEW)
+  rag-qa-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.qa
+    ports:
+      - "8003:8003"
+    environment:
+      - AGENT_PORT=8003
+      - AGENT_NAME=rag-qa
+      - VECTOR_DB_URL=http://vector-db:8004
+    volumes:
+      - ./agents:/app/agents
+      - ./utils:/app/utils
+      - ./.env:/app/.env
+      - vector-data:/app/vector_data
+    depends_on:
+      - vector-db
+    networks:
+      - jobsniper-network
+
+  # MCP PDF Server
+  mcp-pdf-server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mcp
+    ports:
+      - "8010:8010"
+    environment:
+      - MCP_SERVER_PORT=8010
+      - MCP_SERVER_TYPE=pdf
+    volumes:
+      - ./mcp_servers:/app/mcp_servers
+      - temp-uploads:/app/temp
+    networks:
+      - jobsniper-network
+
+  # Vector Database (Chroma/FAISS)
+  vector-db:
+    image: chromadb/chroma:latest
+    ports:
+      - "8004:8000"
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_PORT=8000
+    volumes:
+      - vector-data:/chroma/chroma
+    networks:
+      - jobsniper-network
+
+  # Redis Cache (Optional - for performance)
+  redis-cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - jobsniper-network
+
+  # PostgreSQL Database (Optional - for persistent storage)
+  postgres-db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=jobsniper
+      - POSTGRES_USER=jobsniper
+      - POSTGRES_PASSWORD=jobsniper_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    networks:
+      - jobsniper-network
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - jobsniper-ui
+      - enhanced-orchestrator
+    networks:
+      - jobsniper-network
+    profiles:
+      - production
+
+networks:
+  jobsniper-network:
+    driver: bridge
+
+volumes:
+  vector-data:
+    driver: local
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  temp-uploads:
+    driver: local
+
+# Development override
+# Use: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+---
+# docker-compose.dev.yml (for development)
+version: '3.8'
+
+services:
+  jobsniper-ui:
+    build:
+      target: development
+    volumes:
+      - .:/app
+    environment:
+      - STREAMLIT_SERVER_RUN_ON_SAVE=true
+      - STREAMLIT_SERVER_FILE_WATCHER_TYPE=poll
+    command: streamlit run ui/app.py --server.fileWatcherType poll
+
+  enhanced-orchestrator:
+    build:
+      target: development
+    volumes:
+      - .:/app
+    environment:
+      - PYTHON_ENV=development
+      - DEBUG=true
+
+  # Override other services for development
+  resume-parser-agent:
+    build:
+      target: development
+    volumes:
+      - .:/app
+
+  resume-scorer-agent:
+    build:
+      target: development
+    volumes:
+      - .:/app
+
+  rag-qa-agent:
+    build:
+      target: development
+    volumes:
+      - .:/app
