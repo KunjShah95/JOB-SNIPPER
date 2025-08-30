@@ -13,10 +13,12 @@ from typing import Dict, Any
 
 def render():
     """Render the resume scoring page"""
-    
+    # Add content offset for fixed navbar
+    st.markdown('<div class="jobsniper-content-offset">', unsafe_allow_html=True)
+
     st.title("🎯 AI Resume Scoring")
     st.markdown("Get detailed AI-powered analysis and scoring of your resume")
-    
+
     # Create tabs for different scoring features
     tab1, tab2, tab3 = st.tabs(["📊 Score Resume", "📈 Analytics", "💡 Improvement Tips"])
     
@@ -28,6 +30,8 @@ def render():
     
     with tab3:
         render_improvement_tips()
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def render_scoring_interface():
     """Main resume scoring interface"""
@@ -128,53 +132,198 @@ def extract_text_from_file(file_path: str) -> str:
         return ""
 
 def get_resume_score(resume_text: str, target_role: str, experience_level: str) -> Dict[str, Any]:
-    """Get resume score (mock implementation - will integrate with enhanced_orchestrator)"""
+    """Get resume score using the actual ResumeScorerAgent"""
     
-    # TODO: Integrate with enhanced_orchestrator.py and resume_scorer_agent.py
-    # For now, return mock data
+    try:
+        from agents.resume_scorer_agent import ResumeScorerAgent
+        from agents.message_protocol import AgentMessage
+        
+        # Initialize the scorer agent
+        scorer = ResumeScorerAgent()
+        
+        # Prepare scoring input
+        scoring_input = {
+            "resume_text": resume_text,
+            "target_role": target_role,
+            "experience_level": experience_level
+        }
+        
+        # Create message for scorer agent
+        msg = AgentMessage("ResumeScoringPage", "ResumeScorerAgent", scoring_input)
+        
+        # Run scoring agent
+        scoring_response = scorer.run(msg.to_json())
+        scoring_msg = AgentMessage.from_json(scoring_response)
+        
+        # Get the scoring result
+        result = scoring_msg.data
+        
+        # Ensure all required fields are present
+        if not isinstance(result, dict):
+            # Fallback to mock if result is not a dict
+            return get_mock_score(resume_text, target_role, experience_level)
+        
+        # Validate and enhance the result
+        result = validate_scoring_result(result)
+        
+        return result
+        
+    except Exception as e:
+        st.warning(f"⚠️ AI scoring failed, using fallback method: {str(e)}")
+        # Fallback to mock scoring
+        return get_mock_score(resume_text, target_role, experience_level)
+
+def get_mock_score(resume_text: str, target_role: str, experience_level: str) -> Dict[str, Any]:
+    """Fallback mock scoring when AI fails"""
     
     import random
     
-    # Simulate scoring based on content length and keywords
-    base_score = min(len(resume_text.split()) // 10, 70)  # Base score from content length
+    # Analyze resume content for better scoring
+    word_count = len(resume_text.split())
+    has_skills = any(keyword in resume_text.lower() for keyword in ['python', 'java', 'javascript', 'sql', 'aws', 'docker'])
+    has_experience = any(keyword in resume_text.lower() for keyword in ['experience', 'worked', 'developed', 'managed'])
+    has_education = any(keyword in resume_text.lower() for keyword in ['bachelor', 'master', 'degree', 'university'])
     
-    # Add randomness for demo
+    # Calculate scores based on content analysis
+    base_score = min(word_count // 15, 70)  # Better base score calculation
+    
+    # Technical skills score (0-25)
+    tech_score = 15 if has_skills else 8
+    tech_score += min(len([w for w in resume_text.split() if w.lower() in ['python', 'java', 'sql', 'aws']]), 10)
+    tech_score = min(tech_score, 25)
+    
+    # Experience relevance score (0-25)
+    exp_score = 15 if has_experience else 8
+    if experience_level == "Senior Level":
+        exp_score += 7
+    elif experience_level == "Mid Level":
+        exp_score += 4
+    exp_score = min(exp_score, 25)
+    
+    # Education alignment score (0-20)
+    edu_score = 15 if has_education else 8
+    edu_score = min(edu_score, 20)
+    
+    # Format structure score (0-15)
+    format_score = min(word_count // 50, 12)  # Better format scoring
+    format_score = min(format_score, 15)
+    
+    # Keywords density score (0-15)
+    keyword_score = min(len([w for w in resume_text.lower().split() if w in ['project', 'team', 'leadership', 'analysis']]), 12)
+    keyword_score = min(keyword_score, 15)
+    
     scores = {
-        "technical_skills": min(base_score + random.randint(-5, 10), 25),
-        "experience_relevance": min(base_score + random.randint(-5, 10), 25),
-        "education_alignment": min(base_score + random.randint(-5, 8), 20),
-        "format_structure": min(base_score + random.randint(-3, 5), 15),
-        "keywords_density": min(base_score + random.randint(-3, 5), 15)
+        "technical_skills": tech_score,
+        "experience_relevance": exp_score,
+        "education_alignment": edu_score,
+        "format_structure": format_score,
+        "keywords_density": keyword_score
     }
     
     overall_score = sum(scores.values())
     
+    # Dynamic strengths based on content
+    strengths = []
+    if has_skills:
+        strengths.append("Strong technical skill set")
+    if has_experience:
+        strengths.append("Relevant professional experience")
+    if has_education:
+        strengths.append("Solid educational background")
+    if word_count > 300:
+        strengths.append("Comprehensive content coverage")
+    if any(keyword in resume_text.lower() for keyword in ['leadership', 'team', 'managed']):
+        strengths.append("Leadership experience")
+    
+    # Dynamic improvements based on missing elements
+    improvements = []
+    if not has_skills:
+        improvements.append("Add more technical skills relevant to your field")
+    if not has_experience:
+        improvements.append("Include detailed work experience descriptions")
+    if not has_education:
+        improvements.append("Add educational background and qualifications")
+    if word_count < 200:
+        improvements.append("Expand on your experience and achievements")
+    if overall_score < 70:
+        improvements.append("Include quantified achievements and metrics")
+    
+    # Dynamic missing skills based on target role
+    missing_skills = []
+    if target_role == "Software Engineer":
+        missing_skills = ["System Design", "API Development", "Testing Frameworks", "Version Control"]
+    elif target_role == "Data Scientist":
+        missing_skills = ["Machine Learning", "Statistical Analysis", "Data Visualization", "Python Libraries"]
+    elif target_role == "Product Manager":
+        missing_skills = ["Product Strategy", "User Research", "Agile Methodologies", "Data Analysis"]
+    else:
+        missing_skills = ["Cloud Computing", "API Development", "Agile Methodologies", "Data Analysis"]
+    
     return {
         "overall_score": overall_score,
         "breakdown": scores,
-        "strengths": [
-            "Strong technical skill set",
-            "Clear professional experience",
-            "Well-structured format",
-            "Good use of action verbs"
-        ],
-        "improvements": [
-            "Add more quantified achievements",
-            "Include relevant keywords for ATS",
-            "Expand on project outcomes",
-            "Consider adding a professional summary"
-        ],
-        "missing_skills": [
-            "Cloud Computing (AWS/Azure)",
-            "API Development",
-            "Agile Methodologies",
-            "Data Analysis"
-        ],
+        "strengths": strengths[:5],
+        "improvements": improvements[:5],
+        "missing_skills": missing_skills[:5],
         "industry_match": target_role if target_role != "General" else "Technology",
         "experience_level": experience_level if experience_level != "Auto-detect" else "Mid-Level",
         "timestamp": datetime.now().isoformat(),
-        "scoring_method": "ai_enhanced"
+        "scoring_method": "content_analysis"
     }
+
+def validate_scoring_result(result: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate and ensure all required fields are present in scoring result"""
+    
+    # Required fields with defaults
+    required_fields = {
+        "overall_score": 0,
+        "breakdown": {},
+        "strengths": [],
+        "improvements": [],
+        "missing_skills": [],
+        "industry_match": "General",
+        "experience_level": "Junior",
+        "scoring_method": "unknown"
+    }
+    
+    # Ensure all required fields exist
+    for field, default in required_fields.items():
+        if field not in result:
+            result[field] = default
+    
+    # Validate score ranges
+    if result["overall_score"] > 100:
+        result["overall_score"] = 100
+    elif result["overall_score"] < 0:
+        result["overall_score"] = 0
+    
+    # Ensure breakdown has all components
+    breakdown_defaults = {
+        "technical_skills": 0,
+        "experience_relevance": 0,
+        "education_alignment": 0,
+        "format_structure": 0,
+        "keywords_density": 0
+    }
+    
+    if "breakdown" not in result:
+        result["breakdown"] = breakdown_defaults
+    else:
+        for key, default in breakdown_defaults.items():
+            if key not in result["breakdown"]:
+                result["breakdown"][key] = default
+    
+    # Ensure lists are actually lists
+    list_fields = ["strengths", "improvements", "missing_skills"]
+    for field in list_fields:
+        if not isinstance(result[field], list):
+            result[field] = []
+    
+    # Add timestamp if missing
+    if "timestamp" not in result:
+        result["timestamp"] = datetime.now().isoformat()
+    
+    return result
 
 def display_scoring_results(result: Dict[str, Any]):
     """Display the scoring results with visualizations"""

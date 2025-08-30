@@ -117,9 +117,11 @@ class ResumeScorerAgent(MultiAIAgent):
                     if provider in ai_response["responses"]:
                         try:
                             response_text = ai_response["responses"][provider]
-                            json_match = re.search(r"{.*}", response_text, re.DOTALL)
+                            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
                             if json_match:
                                 response_text = json_match.group(0)
+                                # Try to clean up the JSON string
+                                response_text = self._clean_json_string(response_text)
                             parsed_score = json.loads(response_text)
                             break
                         except Exception as e:
@@ -132,9 +134,10 @@ class ResumeScorerAgent(MultiAIAgent):
                 # Single response format
                 try:
                     if isinstance(ai_response, str):
-                        json_match = re.search(r"{.*}", ai_response, re.DOTALL)
+                        json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
                         if json_match:
                             ai_response = json_match.group(0)
+                            ai_response = self._clean_json_string(ai_response)
                     parsed_score = json.loads(ai_response)
                 except Exception as e:
                     logging.warning(f"Failed to parse AI scoring response: {e}")
@@ -355,3 +358,25 @@ class ResumeScorerAgent(MultiAIAgent):
             "overall_score": 0,
             "timestamp": datetime.now().isoformat()
         }
+    
+    def _clean_json_string(self, json_str):
+        """Clean up JSON string by removing markdown formatting and extra content"""
+        import re
+        # Remove markdown code blocks
+        json_str = re.sub(r'```json\s*', '', json_str)
+        json_str = re.sub(r'```\s*', '', json_str)
+        
+        # Remove any text before the first {
+        first_brace = json_str.find('{')
+        if first_brace > 0:
+            json_str = json_str[first_brace:]
+        
+        # Remove any text after the last }
+        last_brace = json_str.rfind('}')
+        if last_brace >= 0 and last_brace < len(json_str) - 1:
+            json_str = json_str[:last_brace + 1]
+        
+        # Remove trailing commas before closing braces/brackets
+        json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+        
+        return json_str.strip()

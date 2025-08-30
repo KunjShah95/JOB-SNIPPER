@@ -7,9 +7,13 @@ and system status. Provides an intuitive entry point for users.
 import streamlit as st
 from datetime import datetime
 from utils.config import load_config, validate_config
+from ..core.ui_constants import UIConstants
 
 def render():
     """Render the modern home page using glassmorphic design system"""
+    # Add content offset for fixed navbar
+    st.markdown('<div class="jobsniper-content-offset">', unsafe_allow_html=True)
+
     # Welcome Header
     current_hour = datetime.now().hour
     if current_hour < 12:
@@ -26,8 +30,8 @@ def render():
     <div style='display:flex;align-items:center;gap:1.2rem;margin-bottom:2.5rem;'>
         <div style='font-size:2.5rem'>{icon}</div>
         <div>
-            <h1 style='margin-bottom:0;color:#2D6A4F;font-family:Inter,sans-serif;'>{greeting}!</h1>
-            <div style='color:#555;font-size:1.2rem;'>Welcome back to JobSniper AI. Ready to advance your career today?</div>
+            <h1 style='margin-bottom:0;color:{UIConstants.DESIGN["colors"]["primary"]};font-family:{UIConstants.DESIGN["typography"]["primary_font"]};'>{greeting}!</h1>
+            <div style='color:#555;font-size:1.2rem;'>Welcome back to {UIConstants.BRAND['name']}. Ready to advance your career today?</div>
         </div>
     </div>
     """, unsafe_allow_html=True)

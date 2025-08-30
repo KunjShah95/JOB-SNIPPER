@@ -5,6 +5,7 @@ from agents.feedback_agent import FeedbackAgent
 from agents.resume_tailor_agent import ResumeTailorAgent
 from agents.title_generator_agent import TitleGeneratorAgent
 from agents.jd_generator_agent import JDGeneratorAgent
+from agents.resume_scorer_agent import ResumeScorerAgent
 from utils.sqlite_logger import save_to_db
 import json
 import logging
@@ -18,6 +19,7 @@ class ControllerAgent:
         self.tailor = ResumeTailorAgent()
         self.title_gen = TitleGeneratorAgent()
         self.jd_gen = JDGeneratorAgent()
+        self.scorer = ResumeScorerAgent()
 
     def run(self, resume_text, job_title=None):
         """
@@ -48,7 +50,7 @@ class ControllerAgent:
             matched_json = self.matcher.run(msg_match)
             matched_msg = AgentMessage.from_json(matched_json)
             matched = matched_msg.data
-            result["match_result"] = matched
+            result["matched_data"] = matched
         except Exception as e:
             logging.error(f"Error in job matching: {e}")
             result["match_result"] = self.matcher.fallback_matching(
@@ -68,13 +70,36 @@ class ControllerAgent:
             logging.error(f"Error in feedback generation: {e}")
             result["feedback"] = self.feedback.get_fallback_response(resume_text)
 
-        # Step 4: Save to DB
+        # Step 4: Score Resume
         try:
-            save_to_db(result.get("parsed_data", {}), result.get("match_result", {}))
+            scoring_input = {
+                "resume_text": resume_text,
+                "parsed_data": result.get("parsed_data", {})
+            }
+            msg_score = AgentMessage(
+                "Controller", "ResumeScorerAgent", scoring_input
+            ).to_json()
+            score_json = self.scorer.run(msg_score)
+            score_msg = AgentMessage.from_json(score_json)
+            score_result = score_msg.data
+            result["scoring_result"] = score_result
+        except Exception as e:
+            logging.error(f"Error in resume scoring: {e}")
+            result["scoring_result"] = self.scorer._get_fallback_score()
+
+        # Step 5: Save to DB
+        try:
+            save_to_db(result.get("parsed_data", {}), result.get("matched_data", {}))
         except Exception as e:
             logging.error(f"Error saving to database: {e}")
 
-        # Step 5: Job Titles
+        # Step 5: Save to DB
+        try:
+            save_to_db(result.get("parsed_data", {}), result.get("matched_data", {}))
+        except Exception as e:
+            logging.error(f"Error saving to database: {e}")
+
+        # Step 6: Job Titles
         try:
             msg_title = AgentMessage(
                 "Controller", "TitleGeneratorAgent", resume_text
@@ -87,7 +112,7 @@ class ControllerAgent:
             logging.error(f"Error in job title generation: {e}")
             result["job_titles"] = self.title_gen.get_fallback_response("")
 
-        # Step 6: Resume Tailoring Suggestions (optional)
+        # Step 7: Resume Tailoring Suggestions (optional)
         result["tailoring"] = ""
         if job_title:
             try:
@@ -103,7 +128,7 @@ class ControllerAgent:
                 logging.error(f"Error in resume tailoring: {e}")
                 result["tailoring"] = self.tailor.get_fallback_response(job_title)
 
-        # Step 7: Job Description
+        # Step 8: Job Description
         try:
             msg_jd = AgentMessage(
                 "Controller", "JDGeneratorAgent", resume_text
@@ -119,6 +144,11 @@ class ControllerAgent:
         # Validate result to ensure all keys exist
         self._validate_result(result)
 
+        # Ensure result is always a dictionary
+        if not isinstance(result, dict):
+            logging.error(f"Controller agent returned non-dict result: {type(result)}")
+            result = self._get_fallback_result()
+
         return result
 
     def _validate_result(self, result):
@@ -126,8 +156,8 @@ class ControllerAgent:
         if "parsed_data" not in result or not result["parsed_data"]:
             result["parsed_data"] = {}
 
-        if "match_result" not in result:
-            result["match_result"] = {}
+        if "matched_data" not in result:
+            result["matched_data"] = {}
 
         if "feedback" not in result or not result["feedback"]:
             result["feedback"] = ""
@@ -141,16 +171,63 @@ class ControllerAgent:
         if "tailoring" not in result or not result["tailoring"]:
             result["tailoring"] = ""
 
-        if "match_result" in result and "match_percent" not in result["match_result"]:
-            result["match_result"]["match_percent"] = 100
+        if "scoring_result" not in result:
+            result["scoring_result"] = {}
 
-        # Ensure 'job_roles' key exists in match_result
-        if "match_result" in result and "job_roles" not in result["match_result"]:
-            result["match_result"]["job_roles"] = []
+        if "matched_data" in result and "match_percent" not in result["matched_data"]:
+            result["matched_data"]["match_percent"] = 100
 
-        # Ensure 'suggested_skills' key exists in match_result
+        # Ensure 'job_roles' key exists in matched_data
+        if "matched_data" in result and "job_roles" not in result["matched_data"]:
+            result["matched_data"]["job_roles"] = []
+
+        # Ensure 'suggested_skills' key exists in matched_data
         if (
-            "match_result" in result
-            and "suggested_skills" not in result["match_result"]
+            "matched_data" in result
+            and "suggested_skills" not in result["matched_data"]
         ):
-            result["match_result"]["suggested_skills"] = []
+            result["matched_data"]["suggested_skills"] = []
+
+        # Ensure scoring_result has required fields
+        if "scoring_result" in result:
+            scoring = result["scoring_result"]
+            if not isinstance(scoring, dict):
+                result["scoring_result"] = {}
+            else:
+                # Ensure overall_score exists
+                if "overall_score" not in scoring:
+                    scoring["overall_score"] = 0
+                # Ensure breakdown exists
+                if "breakdown" not in scoring:
+                    scoring["breakdown"] = {}
+
+    def _get_fallback_result(self):
+        """Get fallback result when controller fails"""
+        return {
+            "parsed_data": {
+                "name": "Unknown",
+                "skills": [],
+                "experience": "Unknown",
+                "education": "Unknown",
+                "contact": "Unknown"
+            },
+            "matched_data": {
+                "matched_skills": [],
+                "match_percent": 0,
+                "suggested_skills": [],
+                "job_roles": []
+            },
+            "feedback": {
+                "overall_score": 0,
+                "strengths": [],
+                "improvements": [],
+                "recommendations": []
+            },
+            "scoring_result": {
+                "overall_score": 0,
+                "breakdown": {}
+            },
+            "job_titles": [],
+            "job_description": "",
+            "tailoring": ""
+        }

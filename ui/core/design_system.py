@@ -12,44 +12,42 @@ Built for 2025+ with advanced CSS, animations, and responsive design.
 import streamlit as st
 from typing import Dict, List, Optional, Union
 import json
+from .ui_constants import UIConstants
 
 
 class QuantumDesignSystem:
-    """Revolutionary design system for JobSniper AI"""
-    
-    # 🎨 Advanced Color Palette
+    """Quantum Design System for JobSniper AI
+
+    Revolutionary design system with glassmorphism, neumorphism, and quantum aesthetics.
+    Now uses centralized UI constants for consistency and maintainability.
+    """
+
+    # 🎨 Color Palette (Now using UI Constants)
     COLORS = {
-        # Primary Brand Colors
-        'quantum_blue': '#0066FF',
-        'quantum_purple': '#6366F1',
+        # Quantum Theme
+        'quantum_blue': UIConstants.DESIGN['colors']['primary'],
+        'quantum_purple': UIConstants.DESIGN['colors']['secondary'],
         'quantum_cyan': '#06B6D4',
-        'quantum_emerald': '#10B981',
-        'quantum_amber': '#F59E0B',
-        'quantum_rose': '#F43F5E',
+        'quantum_emerald': UIConstants.DESIGN['colors']['success'],
+        'quantum_amber': UIConstants.DESIGN['colors']['warning'],
+        'quantum_rose': UIConstants.DESIGN['colors']['error'],
         
-        # Glassmorphism Colors
-        'glass_white': 'rgba(255, 255, 255, 0.1)',
+        # Glass Effects
+        'glass_white': 'rgba(255, 255, 255, 0.15)',
         'glass_dark': 'rgba(0, 0, 0, 0.1)',
-        'glass_blue': 'rgba(99, 102, 241, 0.1)',
-        'glass_purple': 'rgba(139, 92, 246, 0.1)',
+        'glass_blue': 'rgba(74, 144, 226, 0.1)',
+        'glass_purple': 'rgba(118, 75, 162, 0.1)',
         
-        # Gradient Combinations
-        'gradient_primary': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'gradient_success': 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-        'gradient_warning': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'gradient_info': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'gradient_dark': 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-        
-        # Advanced Gradients
-        'gradient_aurora': 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
-        'gradient_ocean': 'linear-gradient(135deg, #667eea 0%, #06b6d4 50%, #10b981 100%)',
-        'gradient_sunset': 'linear-gradient(135deg, #f59e0b 0%, #f43f5e 50%, #6366f1 100%)',
+        # Gradients
+        'gradient_aurora': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'gradient_ocean': 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)',
+        'gradient_sunset': 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
         
         # Semantic Colors
-        'success': '#10B981',
-        'warning': '#F59E0B', 
-        'error': '#EF4444',
-        'info': '#3B82F6',
+        'success': UIConstants.DESIGN['colors']['success'],
+        'warning': UIConstants.DESIGN['colors']['warning'],
+        'error': UIConstants.DESIGN['colors']['error'],
+        'info': UIConstants.DESIGN['colors']['info'],
         
         # Neutral Palette
         'white': '#FFFFFF',
@@ -66,11 +64,11 @@ class QuantumDesignSystem:
         'black': '#000000',
     }
     
-    # 🔤 Typography System
+    # 🔤 Typography System (Now using UI Constants)
     TYPOGRAPHY = {
-        'font_primary': '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        'font_display': '"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        'font_mono': '"JetBrains Mono", "Fira Code", Consolas, monospace',
+        'font_primary': UIConstants.DESIGN['typography']['primary_font'],
+        'font_display': UIConstants.DESIGN['typography']['display_font'],
+        'font_mono': UIConstants.DESIGN['typography']['mono_font'],
         
         'text_xs': '0.75rem',    # 12px
         'text_sm': '0.875rem',   # 14px
@@ -174,7 +172,7 @@ class QuantumDesignSystem:
         
         body {{
             font-family: {cls.TYPOGRAPHY['font_primary']};
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: {UIConstants.DESIGN['colors']['background']};
             background-attachment: fixed;
             color: {cls.COLORS['gray_800']};
             line-height: 1.6;

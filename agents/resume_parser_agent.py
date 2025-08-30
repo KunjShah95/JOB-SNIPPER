@@ -50,11 +50,11 @@ Return ONLY valid JSON with these fields. Do not include any additional text or 
                         try:
                             provider_response = response["responses"][provider]
                             # Try to extract JSON if wrapped in text
-                            json_match = re.search(
-                                r"{.*}", provider_response, re.DOTALL
-                            )
+                            json_match = re.search(r'\{.*\}', provider_response, re.DOTALL)
                             if json_match:
                                 provider_response = json_match.group(0)
+                                # Try to clean up the JSON string
+                                provider_response = self._clean_json_string(provider_response)
                             parsed = json.loads(provider_response)
                             break
                         except Exception as e:
@@ -68,9 +68,10 @@ Return ONLY valid JSON with these fields. Do not include any additional text or 
                 try:
                     # If response is string, try to extract JSON if wrapped in text
                     if isinstance(response, str):
-                        json_match = re.search(r"{.*}", response, re.DOTALL)
+                        json_match = re.search(r'\{.*\}', response, re.DOTALL)
                         if json_match:
                             response = json_match.group(0)
+                            response = self._clean_json_string(response)
                     parsed = json.loads(response)
                 except Exception as e:
                     logging.warning(f"Failed to parse JSON response: {e}")
@@ -186,6 +187,27 @@ Return ONLY valid JSON with these fields. Do not include any additional text or 
             parsed["years_of_experience"] = 0
 
         return parsed
+
+    def _clean_json_string(self, json_str):
+        """Clean up JSON string by removing markdown formatting and extra content"""
+        # Remove markdown code blocks
+        json_str = re.sub(r'```json\s*', '', json_str)
+        json_str = re.sub(r'```\s*', '', json_str)
+        
+        # Remove any text before the first {
+        first_brace = json_str.find('{')
+        if first_brace > 0:
+            json_str = json_str[first_brace:]
+        
+        # Remove any text after the last }
+        last_brace = json_str.rfind('}')
+        if last_brace >= 0 and last_brace < len(json_str) - 1:
+            json_str = json_str[:last_brace + 1]
+        
+        # Remove trailing commas before closing braces/brackets
+        json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+        
+        return json_str.strip()
 
     def get_fallback_response(self, resume_text):
         """Provide a comprehensive fallback response for resume parsing"""

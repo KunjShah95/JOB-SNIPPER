@@ -40,9 +40,10 @@ class QuantumResumeAnalyzer:
             gradient="ocean"
         )
         
-        tab1, tab2, tab3, tab4 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "📤 Upload & Analyze", 
             "📊 Analysis Results", 
+            "🎯 Resume Score",
             "💡 Recommendations", 
             "📈 Optimization"
         ])
@@ -54,9 +55,12 @@ class QuantumResumeAnalyzer:
             self.render_results_section()
         
         with tab3:
-            self.render_recommendations_section()
+            self.render_scoring_section()
         
         with tab4:
+            self.render_recommendations_section()
+        
+        with tab5:
             self.render_optimization_section()
     
     def render_upload_section(self):
@@ -128,6 +132,11 @@ class QuantumResumeAnalyzer:
                 controller = ControllerAgent()
                 analysis_results = controller.run(resume_text)
 
+                # Ensure analysis_results is a dictionary
+                if not isinstance(analysis_results, dict):
+                    st.warning("⚠️ Analysis returned invalid format, using fallback data.")
+                    analysis_results = self.generate_mock_analysis(resume_text)
+
                 # Store results in session state
                 st.session_state['resume_analysis'] = analysis_results
                 self.analysis_results = analysis_results
@@ -138,8 +147,9 @@ class QuantumResumeAnalyzer:
             except Exception as e:
                 st.error(f"❌ Error analyzing resume: {str(e)}")
                 # Fallback to mock analysis for demo
-                self.analysis_results = self.generate_mock_analysis(resume_text if 'resume_text' in locals() else "")
-                st.session_state['resume_analysis'] = self.analysis_results
+                mock_results = self.generate_mock_analysis(resume_text if 'resume_text' in locals() else "")
+                self.analysis_results = mock_results
+                st.session_state['resume_analysis'] = mock_results
 
     def generate_mock_analysis(self, resume_text: str) -> Dict[str, Any]:
         """Generate mock analysis results as fallback"""
@@ -179,8 +189,13 @@ class QuantumResumeAnalyzer:
 
         results = st.session_state['resume_analysis']
 
+        # Ensure results is a dictionary
+        if not isinstance(results, dict):
+            st.error("❌ Invalid analysis results format. Please re-upload and analyze your resume.")
+            return
+
         # Display parsed data
-        if 'parsed_data' in results:
+        if isinstance(results.get('parsed_data'), dict):
             parsed = results['parsed_data']
 
             st.subheader("📋 Parsed Information")
@@ -193,11 +208,11 @@ class QuantumResumeAnalyzer:
 
             with col2:
                 st.write(f"**Education:** {parsed.get('education', 'N/A')}")
-                if parsed.get('skills'):
+                if parsed.get('skills') and isinstance(parsed['skills'], list):
                     st.write(f"**Skills:** {', '.join(parsed['skills'][:5])}")
 
         # Display matching results
-        if 'matched_data' in results:
+        if isinstance(results.get('matched_data'), dict):
             matched = results['matched_data']
 
             st.subheader("🎯 Job Matching Analysis")
@@ -223,7 +238,7 @@ class QuantumResumeAnalyzer:
                 st.write(f"🎯 {role}")
 
         # Display feedback
-        if 'feedback' in results:
+        if isinstance(results.get('feedback'), dict):
             feedback = results['feedback']
 
             st.subheader("💡 AI Feedback")
@@ -231,15 +246,187 @@ class QuantumResumeAnalyzer:
             if 'overall_score' in feedback:
                 st.metric("Overall Resume Score", f"{feedback['overall_score']}/10")
 
-            if feedback.get('strengths'):
+            if feedback.get('strengths') and isinstance(feedback['strengths'], list):
                 st.write("**Strengths:**")
                 for strength in feedback['strengths']:
                     st.write(f"💪 {strength}")
 
-            if feedback.get('improvements'):
+            if feedback.get('improvements') and isinstance(feedback['improvements'], list):
                 st.write("**Areas for Improvement:**")
                 for improvement in feedback['improvements']:
                     st.write(f"🔧 {improvement}")
+
+    def render_scoring_section(self):
+        """Render resume scoring results"""
+        if 'resume_analysis' not in st.session_state:
+            st.markdown("""
+            <div style="text-align: center; padding: 3rem; color: #666;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🎯</div>
+                <h3>No Scoring Results</h3>
+                <p>Upload and analyze your resume to get detailed scoring and feedback.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            return
+
+        results = st.session_state['resume_analysis']
+
+        # Ensure results is a dictionary
+        if not isinstance(results, dict):
+            st.error("❌ Invalid analysis results format.")
+            return
+
+        # Check if scoring results are available
+        if 'scoring_result' not in results or not isinstance(results['scoring_result'], dict):
+            st.markdown("""
+            <div style="text-align: center; padding: 2rem; color: #666;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                <h4>Resume Scoring Not Available</h4>
+                <p>The scoring analysis is being processed. Please try again in a moment.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            return
+
+        scoring = results['scoring_result']
+
+        # Overall Score Display
+        st.subheader("📊 Resume Score Overview")
+
+        col1, col2, col3 = st.columns([2, 1, 1])
+
+        with col1:
+            overall_score = scoring.get('overall_score', 0)
+            # Score gauge using plotly
+            import plotly.graph_objects as go
+
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number+delta",
+                value=overall_score,
+                domain={'x': [0, 1], 'y': [0, 1]},
+                title={'text': "Overall Resume Score"},
+                delta={'reference': 80, 'increasing': {'color': "green"}, 'decreasing': {'color': "red"}},
+                gauge={
+                    'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
+                    'bar': {'color': "darkblue"},
+                    'bgcolor': "white",
+                    'borderwidth': 2,
+                    'bordercolor': "gray",
+                    'steps': [
+                        {'range': [0, 40], 'color': 'lightcoral'},
+                        {'range': [40, 60], 'color': 'lightyellow'},
+                        {'range': [60, 80], 'color': 'lightgreen'},
+                        {'range': [80, 100], 'color': 'darkgreen'}
+                    ],
+                    'threshold': {
+                        'line': {'color': "red", 'width': 4},
+                        'thickness': 0.75,
+                        'value': 80
+                    }
+                }
+            ))
+
+            fig.update_layout(height=300)
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            # Score interpretation
+            if overall_score >= 80:
+                st.success("🏆 Excellent!")
+                st.write("Your resume is highly competitive.")
+            elif overall_score >= 60:
+                st.warning("👍 Good")
+                st.write("Your resume is solid with room for improvement.")
+            else:
+                st.error("⚠️ Needs Work")
+                st.write("Consider major improvements to your resume.")
+
+        with col3:
+            # Scoring method
+            method = scoring.get('scoring_method', 'Unknown')
+            st.info(f"Method: {method}")
+            level = scoring.get('experience_level', 'Unknown')
+            st.write(f"Level: {level}")
+
+        # Detailed Breakdown
+        st.subheader("📈 Detailed Score Breakdown")
+
+        breakdown = scoring.get('breakdown', {})
+        if breakdown:
+            # Create a radar chart for the breakdown
+            categories = list(breakdown.keys())
+            values = [breakdown[cat] for cat in categories]
+
+            fig_radar = go.Figure()
+
+            fig_radar.add_trace(go.Scatterpolar(
+                r=values,
+                theta=categories,
+                fill='toself',
+                name='Your Scores',
+                line_color='darkblue'
+            ))
+
+            fig_radar.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, max(values) + 5] if values else [0, 25]
+                    )),
+                showlegend=False,
+                height=400
+            )
+
+            st.plotly_chart(fig_radar, use_container_width=True)
+
+            # Individual score bars
+            st.write("**Individual Component Scores:**")
+            for category, score in breakdown.items():
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"**{category.replace('_', ' ').title()}:**")
+                with col2:
+                    st.progress(score / 25 if 'skills' in category.lower() or 'relevance' in category.lower() else
+                              score / 20 if 'education' in category.lower() else score / 15)
+                    st.write(f"{score}")
+
+        # Strengths and Improvements
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("💪 Strengths")
+            strengths = scoring.get('strengths', [])
+            if strengths:
+                for strength in strengths:
+                    st.success(f"✅ {strength}")
+            else:
+                st.write("No specific strengths identified.")
+
+        with col2:
+            st.subheader("🔧 Areas for Improvement")
+            improvements = scoring.get('improvements', [])
+            if improvements:
+                for improvement in improvements:
+                    st.warning(f"⚠️ {improvement}")
+            else:
+                st.write("No major improvements needed.")
+
+        # Missing Skills
+        st.subheader("📚 Recommended Skills to Add")
+        missing_skills = scoring.get('missing_skills', [])
+        if missing_skills:
+            cols = st.columns(3)
+            for i, skill in enumerate(missing_skills):
+                with cols[i % 3]:
+                    st.info(f"🎯 {skill}")
+        else:
+            st.write("No additional skills recommended at this time.")
+
+        # Industry Match
+        industry_match = scoring.get('industry_match', 'General')
+        st.subheader(f"🏢 Best Industry Match: {industry_match}")
+
+        # Timestamp
+        timestamp = scoring.get('timestamp', 'Unknown')
+        st.caption(f"Analysis completed: {timestamp}")
 
     def render_recommendations_section(self):
         """Render recommendations"""
@@ -293,5 +480,10 @@ class QuantumResumeAnalyzer:
 
 def render():
     """Render the quantum resume analysis page"""
+    # Add content offset for fixed navbar
+    st.markdown('<div class="jobsniper-content-offset">', unsafe_allow_html=True)
+
     analyzer = QuantumResumeAnalyzer()
     analyzer.render()
+
+    st.markdown('</div>', unsafe_allow_html=True)

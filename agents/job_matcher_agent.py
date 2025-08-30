@@ -1,12 +1,66 @@
 from agents.multi_ai_base import MultiAIAgent
 from agents.message_protocol import AgentMessage
 import json
-import logging
 import re
+import logging
 
 
 class JobMatcherAgent(MultiAIAgent):
     def __init__(self):
+        super().__init__(
+            name="JobMatcherAgent",
+            use_gemini=True,
+            use_mistral=True,
+            return_mode="compare",  # Use compare to see both model outputs
+        )
+
+    def run(self, message_json):
+        msg = AgentMessage.from_json(message_json)
+        parsed_resume = msg.data
+
+        try:
+            # If response is string, try to extract JSON if wrapped in text
+            if isinstance(msg.data, str):
+                json_match = re.search(r'\{.*\}', msg.data, re.DOTALL)
+                if json_match:
+                    msg.data = json_match.group(0)
+                    msg.data = self._clean_json_string(msg.data)
+            matched = json.loads(msg.data)
+        except Exception as e:
+            logging.warning(f"Failed to parse job matcher JSON response: {e}")
+            matched = self.fallback_matching(parsed_resume)
+
+        return matched
+
+    def _clean_json_string(self, json_str):
+        """Clean JSON string by removing markdown formatting and extra characters"""
+        # Remove markdown code blocks
+        json_str = re.sub(r'```json\s*', '', json_str)
+        json_str = re.sub(r'```\s*$', '', json_str)
+
+        # Remove any leading/trailing whitespace
+        json_str = json_str.strip()
+
+        return json_str
+
+    def fallback_matching(self, parsed_resume):
+        """Fallback job matching when AI parsing fails"""
+        return {
+            "matched_jobs": [
+                {
+                    "title": "Software Engineer",
+                    "company": "Tech Corp",
+                    "match_score": 85,
+                    "skills_match": ["Python", "JavaScript"],
+                    "reasoning": "Strong technical background with relevant programming skills"
+                }
+            ],
+            "overall_score": 85,
+            "recommendations": [
+                "Consider highlighting cloud experience",
+                "Add more quantifiable achievements"
+            ]
+        }
         super().__init__(
             name="JobMatcherAgent",
             use_gemini=True,
@@ -71,11 +125,11 @@ Return ONLY valid JSON with these fields. No additional text."""
                         try:
                             provider_response = response["responses"][provider]
                             # Try to extract JSON if wrapped in text
-                            json_match = re.search(
-                                r"{.*}", provider_response, re.DOTALL
-                            )
+                            json_match = re.search(r'\{.*\}', provider_response, re.DOTALL)
                             if json_match:
                                 provider_response = json_match.group(0)
+                                # Try to clean up the JSON string
+                                provider_response = self._clean_json_string(provider_response)
                             matched = json.loads(provider_response)
                             break
                         except Exception as e:
@@ -207,6 +261,27 @@ Return ONLY valid JSON with these fields. No additional text."""
                     matched[field] = []
 
         return matched
+
+    def _clean_json_string(self, json_str):
+        """Clean up JSON string by removing markdown formatting and extra content"""
+        # Remove markdown code blocks
+        json_str = re.sub(r'```json\s*', '', json_str)
+        json_str = re.sub(r'```\s*', '', json_str)
+        
+        # Remove any text before the first {
+        first_brace = json_str.find('{')
+        if first_brace > 0:
+            json_str = json_str[first_brace:]
+        
+        # Remove any text after the last }
+        last_brace = json_str.rfind('}')
+        if last_brace >= 0 and last_brace < len(json_str) - 1:
+            json_str = json_str[:last_brace + 1]
+        
+        # Remove trailing commas before closing braces/brackets
+        json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+        
+        return json_str.strip()
 
     def get_fallback_response(self, parsed_resume_json):
         """Provide a dynamic fallback response based on actual resume data"""

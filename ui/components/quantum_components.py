@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from typing import Dict, List, Optional, Union, Any
 import json
+from ..core.ui_constants import UIConstants
 
 
 class QuantumComponents:
@@ -22,10 +23,10 @@ class QuantumComponents:
         """Create a quantum header with animated background"""
         
         gradients = {
-            "aurora": "linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)",
-            "ocean": "linear-gradient(135deg, #667eea 0%, #06b6d4 50%, #10b981 100%)",
-            "sunset": "linear-gradient(135deg, #f59e0b 0%, #f43f5e 50%, #6366f1 100%)",
-            "cosmic": "linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)"
+            "aurora": UIConstants.COLORS['gradient_aurora'],
+            "ocean": UIConstants.COLORS['gradient_ocean'],
+            "sunset": UIConstants.COLORS['gradient_sunset'],
+            "cosmic": f"linear-gradient(135deg, {UIConstants.DESIGN['colors']['primary']} 0%, {UIConstants.DESIGN['colors']['secondary']} 50%, {UIConstants.DESIGN['colors']['info']} 100%)"
         }
         
         st.markdown(f"""
