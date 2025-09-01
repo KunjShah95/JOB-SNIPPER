@@ -12,8 +12,9 @@ import os
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from ui.core.design_system import apply_global_styles
-from ui.styles.modern_theme import set_modern_theme
+from ui.templates.page_template import render_standard_page, render_placeholder_tab
+from ui.components.quantum_components import quantum_card
+from ui.core.ui_constants import UIConstants
 from agents.advanced_interview_prep_agent import AdvancedInterviewPrepAgent
 from agents.web_scraper_agent import WebScraperAgent
 from utils.error_handler import global_error_handler, safe_execute
@@ -22,49 +23,52 @@ from utils.error_handler import global_error_handler, safe_execute
 def render():
     """Main interview preparation page"""
     
-    set_modern_theme()
-    apply_global_styles()
-    st.markdown("""
-        <div style='display:flex;align-items:center;gap:1rem;margin-bottom:2rem;'>
-            <img src='https://img.icons8.com/ios-filled/100/2D6A4F/ai.png' width='44' style='margin-bottom:0;'>
-            <div>
-                <h1 style='margin-bottom:0;color:#2D6A4F;font-family:Inter,sans-serif;'>Interview Preparation</h1>
-                <div style='color:#555;font-size:1.1rem;'>Practice and prepare for interviews with AI-powered assistance</div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+    # Initialize session state
     if "interview_sessions" not in st.session_state:
         st.session_state.interview_sessions = []
     if "practice_questions" not in st.session_state:
         st.session_state.practice_questions = []
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "🎯 Quick Prep", 
-        "🎤 Mock Interview", 
-        "🏢 Company Research", 
-        "📚 Question Bank", 
-        "📊 Progress"
-    ])
-    with tab1:
-        _render_quick_prep_tab()
-    with tab2:
-        _render_mock_interview_tab()
-    with tab3:
-        _render_company_research_tab()
-    with tab4:
-        _render_question_bank_tab()
-    with tab5:
-        _render_progress_tab()
+    
+    # Configure tabs
+    tabs_config = [
+        {"key": "quick_prep", "label": "🎯 Quick Prep"},
+        {"key": "mock_interview", "label": "🎤 Mock Interview"},
+        {"key": "company_research", "label": "🏢 Company Research"},
+        {"key": "question_bank", "label": "📚 Question Bank"},
+        {"key": "progress", "label": "📊 Progress"}
+    ]
+    
+    tab_renders = {
+        "quick_prep": _render_quick_prep_tab,
+        "mock_interview": _render_mock_interview_tab,
+        "company_research": _render_company_research_tab,
+        "question_bank": _render_question_bank_tab,
+        "progress": _render_progress_tab
+    }
+    
+    # Use standard page template
+    render_standard_page(
+        title="Interview Preparation",
+        subtitle="Practice and prepare for interviews with AI-powered assistance",
+        icon="🎤",
+        tabs_config=tabs_config,
+        tab_renders=tab_renders,
+        gradient="sunset"
+    )
 
 
 def _render_quick_prep_tab():
     """Render quick preparation tab"""
     
-    st.markdown("""
-    <div style='backdrop-filter: blur(8px); background: rgba(255,255,255,0.7); border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.10); padding: 2rem 1.5rem; margin-bottom: 2rem;'>
-        <h3 style='margin-top:0;'>⚡ Quick Interview Prep</h3>
-        <p>Fill in your interview details to get a personalized preparation plan.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    quantum_card(
+        title="⚡ Quick Interview Prep",
+        content="""
+        <p style="color: #6B7280; margin-bottom: 1.5rem;">
+            Fill in your interview details to get a personalized preparation plan tailored to your role and company.
+        </p>
+        """,
+        card_type="glass"
+    )
     
     # Interview details form
     with st.form("interview_prep_form"):
@@ -139,43 +143,19 @@ def _render_quick_prep_tab():
 
 def _render_mock_interview_tab():
     """Render mock interview tab"""
-    st.markdown("""
-    <div style="text-align: center; padding: 3rem; color: #666;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">🎤</div>
-        <h3>Mock Interview</h3>
-        <p>AI-powered mock interviews coming soon! Practice with realistic scenarios and get instant feedback.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    render_placeholder_tab("AI-powered mock interviews coming soon! Practice with realistic scenarios and get instant feedback.")
 
 def _render_company_research_tab():
     """Render company research tab"""
-    st.markdown("""
-    <div style="text-align: center; padding: 3rem; color: #666;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">🏢</div>
-        <h3>Company Research</h3>
-        <p>Get comprehensive company insights, culture information, and interview tips for your target companies.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    render_placeholder_tab("Get comprehensive company insights, culture information, and interview tips for your target companies.")
 
 def _render_question_bank_tab():
     """Render question bank tab"""
-    st.markdown("""
-    <div style="text-align: center; padding: 3rem; color: #666;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
-        <h3>Question Bank</h3>
-        <p>Access thousands of interview questions categorized by role, company, and difficulty level.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    render_placeholder_tab("Access thousands of interview questions categorized by role, company, and difficulty level.")
 
 def _render_progress_tab():
     """Render progress tab"""
-    st.markdown("""
-    <div style="text-align: center; padding: 3rem; color: #666;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
-        <h3>Progress Tracking</h3>
-        <p>Track your interview preparation progress and see your improvement over time.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    render_placeholder_tab("Track your interview preparation progress and see your improvement over time.")
 
 def _generate_prep_plan(data):
     """Generate preparation plan"""
