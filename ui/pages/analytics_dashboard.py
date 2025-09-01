@@ -11,69 +11,81 @@ from datetime import datetime, timedelta
 import time
 from typing import Dict, Any, List
 
+from ui.templates.page_template import render_standard_page
+from ui.components.quantum_components import quantum_card, quantum_metrics_grid
+from ui.core.ui_constants import UIConstants
+
 def render():
     """Render the analytics dashboard"""
     
-    st.title("📊 Analytics Dashboard")
-    st.markdown("Real-time insights into resume processing and system performance")
+    # Configure tabs
+    tabs_config = [
+        {"key": "overview", "label": "📈 Overview"},
+        {"key": "resume_insights", "label": "🎯 Resume Insights"},
+        {"key": "performance", "label": "⚡ Performance"},
+        {"key": "search_analytics", "label": "🔍 Search Analytics"}
+    ]
     
-    # Create tabs for different analytics views
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 Overview", "🎯 Resume Insights", "⚡ Performance", "🔍 Search Analytics"])
+    tab_renders = {
+        "overview": render_overview_analytics,
+        "resume_insights": render_resume_insights,
+        "performance": render_performance_metrics,
+        "search_analytics": render_search_analytics
+    }
     
-    with tab1:
-        render_overview_analytics()
-    
-    with tab2:
-        render_resume_insights()
-    
-    with tab3:
-        render_performance_metrics()
-    
-    with tab4:
-        render_search_analytics()
+    # Use standard page template
+    render_standard_page(
+        title="Analytics Dashboard",
+        subtitle="Real-time insights into resume processing and system performance",
+        icon="📊",
+        tabs_config=tabs_config,
+        tab_renders=tab_renders,
+        gradient="aurora"
+    )
 
 def render_overview_analytics():
     """Render overview analytics"""
     
-    st.markdown("### 📊 System Overview")
+    # Key metrics using quantum components
+    metrics = [
+        {
+            "icon": "📄",
+            "value": "1,247",
+            "label": "Total Resumes Processed",
+            "trend": "23 today",
+            "color": "blue"
+        },
+        {
+            "icon": "📊",
+            "value": "78.5",
+            "label": "Average Score",
+            "trend": "2.3 vs last week",
+            "color": "green"
+        },
+        {
+            "icon": "💬",
+            "value": "342",
+            "label": "QA Queries",
+            "trend": "15 today",
+            "color": "purple"
+        },
+        {
+            "icon": "⚡",
+            "value": "99.8%",
+            "label": "System Uptime",
+            "trend": "0.1% vs last month",
+            "color": "orange"
+        }
+    ]
     
-    # Key metrics
-    col1, col2, col3, col4 = st.columns(4)
+    quantum_metrics_grid(metrics, columns=4)
     
-    with col1:
-        st.metric(
-            "Total Resumes Processed",
-            "1,247",
-            delta="23 today",
-            delta_color="normal"
-        )
-    
-    with col2:
-        st.metric(
-            "Average Score",
-            "78.5",
-            delta="2.3 vs last week",
-            delta_color="normal"
-        )
-    
-    with col3:
-        st.metric(
-            "QA Queries",
-            "342",
-            delta="15 today",
-            delta_color="normal"
-        )
-    
-    with col4:
-        st.metric(
-            "System Uptime",
-            "99.8%",
-            delta="0.1% vs last month",
-            delta_color="normal"
-        )
-    
-    # Processing trends
-    st.markdown("### 📈 Processing Trends")
+    # Processing trends in quantum card
+    quantum_card(
+        title="📈 Daily Processing Trends",
+        content="",
+        card_type="glass"
+    )
     
     # Generate sample data
     dates = pd.date_range(start=datetime.now() - timedelta(days=30), end=datetime.now(), freq='D')
@@ -92,7 +104,7 @@ def render_overview_analytics():
         y=processing_data['Resumes Processed'],
         mode='lines+markers',
         name='Resumes Processed',
-        line=dict(color='#1f77b4')
+        line=dict(color=UIConstants.DESIGN['colors']['primary'])
     ))
     
     fig.add_trace(go.Scatter(
@@ -101,7 +113,7 @@ def render_overview_analytics():
         mode='lines+markers',
         name='QA Queries',
         yaxis='y2',
-        line=dict(color='#ff7f0e')
+        line=dict(color=UIConstants.DESIGN['colors']['secondary'])
     ))
     
     fig.update_layout(
@@ -113,7 +125,9 @@ def render_overview_analytics():
             overlaying='y',
             side='right'
         ),
-        height=400
+        height=400,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
     )
     
     st.plotly_chart(fig, use_container_width=True)
